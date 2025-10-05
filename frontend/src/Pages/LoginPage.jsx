@@ -3,6 +3,7 @@ import React from 'react'
 import { useForm } from '@mantine/form'
 import { IconBrandGoogle, IconBrandFacebook } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
+import { GoogleLogin } from '@react-oauth/google'
 
 const LoginPage = () => {
     const form = useForm({
@@ -81,15 +82,23 @@ const LoginPage = () => {
                     {/* Social login */}
                     <div className="flex flex-col gap-3">
                         {/* Google */}
-                        <Button
-                        fullWidth
-                        radius="md"
-                        size="md"
-                        className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100 flex items-center justify-center gap-2"
-                        leftSection={<IconBrandGoogle size={18} color="#EA4335" />}
-                        >
-                        Đăng nhập bằng Google
-                        </Button>
+                        <GoogleLogin
+                        onSuccess={credentialResponse => {
+                            const idToken = credentialResponse.credential;
+                            fetch('http://localhost:8080/user/login/google', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ idToken })
+                            })
+                            .then(res => res.json())
+                            .then(user => {
+                            console.log('Google login success:', user);
+                            // Lưu user vào state/context, redirect
+                            })
+                            .catch(err => console.error('Google login error:', err));
+                        }}
+                        onError={() => console.log('Google login failed')}
+                        />
 
                         {/* Facebook */}
                         <Button
