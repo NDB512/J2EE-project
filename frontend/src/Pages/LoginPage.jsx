@@ -85,7 +85,7 @@ const LoginPage = () => {
                         <GoogleLogin
                         onSuccess={credentialResponse => {
                             const idToken = credentialResponse.credential;
-                            fetch('http://localhost:8080/user/login/google', {
+                            fetch('http://localhost:9000/user/login/google', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ idToken })
