@@ -2,8 +2,10 @@ import '@mantine/core/styles.css'
 import './App.css'
 import './index.css'
 import { createTheme, MantineProvider } from '@mantine/core'
-import { Button } from '@mantine/core'
 import AppRouter from './Routers/AppRouter'
+import { Notifications } from '@mantine/notifications'
+import '@mantine/notifications/styles.css'
+
 
 const theme = createTheme({
   colors: {
@@ -24,6 +26,7 @@ function App() {
 
   return (
     <MantineProvider theme={theme}>
+      <Notifications />
       <AppRouter />
     </MantineProvider>
   )

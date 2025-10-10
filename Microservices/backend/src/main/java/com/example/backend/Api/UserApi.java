@@ -7,14 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.Dto.AuthResponse;
-import com.example.backend.Dto.ReponseDto;
 import com.example.backend.Dto.UserDto;
 import com.example.backend.Exception.BeException;
 import com.example.backend.Services.UserService;
@@ -31,9 +29,18 @@ public class UserApi {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<ReponseDto> registerUser(@RequestBody UserDto userDto) throws BeException {
+    public ResponseEntity<AuthResponse> registerUser(@RequestBody UserDto userDto) throws BeException {
+        // Set default name nếu chưa có (từ email?)
+        if (userDto.getName() == null || userDto.getName().trim().isEmpty()) {
+            userDto.setName(userDto.getEmail().split("@")[0]);  // Tạo name từ email prefix
+        }
         userService.registerUser(userDto);
-        return new ResponseEntity<>(new ReponseDto("Đăng ký user thành công"), HttpStatus.CREATED);
+
+        UserDetails userDetails = userService.loadUserByUsername(userDto.getEmail());
+        String accessToken = jwtUtil.generateAccessToken(userDetails);
+        String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+
+        return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
     }
 
     @PostMapping("/login")
@@ -71,18 +78,11 @@ public class UserApi {
                 throw new BeException("Invalid or expired refresh token");
             }
 
-            // Generate new access token
+            // Generate new tokens
             String newAccessToken = jwtUtil.generateAccessToken(userDetails);
+            String newRefreshToken = jwtUtil.generateRefreshToken(userDetails);
 
-            // Optional: Rotate refresh token (generate new để invalidate old)
-            String newRefreshToken = jwtUtil.generateRefreshToken(userDetails); // Rotate để secure hơn
-
-            UserDto user = userService.getUserByEmail(username); // Hoặc refactor UserService thêm method
-            Long userId = user.getId();
-
-            UserDto dto = userService.getUserById(userId);
-
-            return ResponseEntity.ok(new AuthResponse(newAccessToken, newRefreshToken, dto));
+            return ResponseEntity.ok(new AuthResponse(newAccessToken, newRefreshToken));
         } catch (BeException e) {
             throw e;
         } catch (Exception e) {

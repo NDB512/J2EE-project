@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ProfileApplication",
+            "request": "launch",
+            "mainClass": "com.example.profile.profile.ProfileApplication"
+        },
+        {
+            "type": "java",
             "name": "GatewayMsApplication",
             "request": "launch",
             "mainClass": "com.example.GatewayMS.GatewayMsApplication"
@@ -14,7 +20,8 @@
             "mainClass": "com.example.backend.BackendApplication",
             "projectName": "backend",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=54019 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=backend"
         },
         {
             "type": "java",
@@ -33,6 +40,17 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.gateway.gateway.GatewayApplication",
             "projectName": "gateway",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=54022 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=gateway"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ProfileApplication<profile>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.profile.ProfileApplication",
+            "projectName": "profile",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

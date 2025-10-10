@@ -1,6 +1,5 @@
 package com.example.backend.Services.impl;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +17,12 @@ import com.example.backend.Dto.UserDto;
 import com.example.backend.Exception.BeException;
 import com.example.backend.Models.User;
 import com.example.backend.Repositories.UserRepository;
+import com.example.backend.Services.ApiService;
 import com.example.backend.Services.UserService;
 import com.example.backend.Utilities.JwtUtil;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
@@ -33,13 +34,35 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private ApiService apiService;
+
     @Override
     @Transactional
     public void registerUser(UserDto userDto) throws BeException {
+        // Check email duplicate
         if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
             throw new BeException("User already exists");
         }
+
+        // Validate theo role
+        if (userDto.getRole() == null) {
+            throw new BeException("Role is required");
+        }
+
+        // Encode password
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        Long profileId;
+        try {
+            profileId = apiService.addProfile(userDto, null).block();  // Null token cho register
+            if (profileId == null || profileId == -1L) {
+                throw new BeException("Failed to create profile");
+            }
+        } catch (Exception e) {
+            throw new BeException("Profile creation failed: " + e.getMessage());
+        }
+
+        userDto.setProfileId(profileId);
         userRepository.save(userDto.toEntity());
     }
 
@@ -57,8 +80,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         String accessToken = jwtUtil.generateAccessToken(userDetails);
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
 
-        UserDto dto = new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole());
-        return new AuthResponse(accessToken, refreshToken, dto);
+        return new AuthResponse(accessToken, refreshToken);
     }
 
     @Override
@@ -79,6 +101,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new BeException("Invalid user info from Google");
         }
 
+        UserDto userDto = new UserDto();
+
         User user = userRepository.findByEmail(email)
                 .map(u -> {
                     u.setName(name);
@@ -89,27 +113,45 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     newUser.setName(name);
                     newUser.setEmail(email);
                     newUser.setPassword("{noop}dummy-google-pass"); // Dummy cho consistency
-                    newUser.setRole(Roles.User);
+                    newUser.setRole(Roles.Patient); // Default role
                     newUser.setProvider(User.AuthProvider.GOOGLE);
+                    userDto.setEmail(email);
+                    userDto.setName(name);
+                    userDto.setRole(Roles.Patient);
                     return userRepository.save(newUser);
                 });
+        
+        Long profileId;
+        try {
+            profileId = apiService.addProfile(userDto, null).block();  // Null token cho register
+            if (profileId == null || profileId == -1L) {
+                throw new BeException("Failed to create profile");
+            }
+        } catch (Exception e) {
+            throw new BeException("Profile creation failed: " + e.getMessage());
+        }
+
+        userDto.setProfileId(profileId);
 
         UserDetails userDetails = loadUserByUsername(user.getEmail());
         String accessToken = jwtUtil.generateAccessToken(userDetails);
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
 
-        UserDto dto = new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole());
-        return new AuthResponse(accessToken, refreshToken, dto);
+        return new AuthResponse(accessToken, refreshToken);
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
-        return new org.springframework.security.core.userdetails.User(
+        // Sử dụng CustomUserDetails để chứa thêm info
+        return new com.example.backend.Config.CustomUserDetails(
+            user.getId(), 
+            user.getName(), 
             user.getEmail(), 
-            user.getPassword() != null ? user.getPassword() : "{noop}dummy", // Handle null
-            List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole())));
+            user.getPassword() != null ? user.getPassword() : "{noop}dummy", 
+            user.getRole()
+        );
     }
 
     @Override
@@ -117,7 +159,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BeException("User not found"));
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole());
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), null, user.getLicenseNumber());
     }
 
     @Override
@@ -140,7 +182,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (userDto.getRole() != null) user.setRole(userDto.getRole());
         
         userRepository.save(user);
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole());
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), null, user.getLicenseNumber());
     }
 
     @Override
@@ -148,6 +190,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDto getUserByEmail(String email) throws BeException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BeException("User not found"));
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole());
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), null, user.getLicenseNumber());
     }
 }

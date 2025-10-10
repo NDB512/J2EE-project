@@ -1,40 +1,106 @@
-import { PasswordInput, TextInput, Button } from '@mantine/core'
-import React from 'react'
-import { useForm } from '@mantine/form'
-import { IconBrandGoogle, IconBrandFacebook } from '@tabler/icons-react'
-import { Link } from 'react-router-dom'
-import { GoogleLogin } from '@react-oauth/google'
+import { PasswordInput, TextInput, Button, Loader } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import React, { useState } from 'react';
+import { useForm } from '@mantine/form';
+import { IconBrandGoogle, IconBrandFacebook } from '@tabler/icons-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin, googleLogout } from '@react-oauth/google';
+import { useAuth } from '../Content/AuthContext';
+import { errorNotification } from '../Utils/Notification';
+import { jwtDecode } from 'jwt-decode';
+import { useEffect } from 'react';
 
 const LoginPage = () => {
+    const { login, googleLogin } = useAuth();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
     const form = useForm({
-        initialValues: {
-        email: '',
-        password: '',
-        },
-
+        initialValues: { email: '', password: '' },
         validate: {
-        email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Email không hợp lệ'),
-        password: (value) =>
-            value.length >= 6 ? null : 'Mật khẩu phải có ít nhất 6 ký tự',
+            email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Email không hợp lệ'),
+            password: (value) => (value.length >= 6 ? null : 'Mật khẩu phải có ít nhất 6 ký tự'),
         },
-    })
+    });
 
-    const handleSubmit = (values) => {
-        console.log('✅ Dữ liệu form:', values)
-    }
+    // Hàm điều hướng theo vai trò
+    const redirectByRole = (role) => {
+        switch (role) {
+            case 'Patient':
+                navigate('/patient');
+                break;
+            case 'Doctor':
+                navigate('/doctor');
+                break;
+            case 'Pharmacy':
+                navigate('/pharmacy');
+                break;
+            case 'Admin': // Sửa từ 'Aamin' thành 'Admin'
+                navigate('/admin');
+                break;
+            default:
+                navigate('/unauthorized');
+                break;
+        }
+    };
+
+    // Đăng nhập bằng email
+    const handleSubmit = async (values) => {
+        setLoading(true);
+        try {
+            const data = await login(values.email, values.password);
+            redirectByRole(data.role);
+        } catch (err) {
+            errorNotification(err.message || 'Đăng nhập thất bại');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Đăng nhập Google
+    const handleGoogleSuccess = async (credentialResponse) => {
+        setLoading(true);
+        try {
+            const idToken = credentialResponse.credential;
+            const res = await fetch('http://localhost:9000/user/login/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken }),
+            });
+            if (!res.ok) throw new Error('Google login failed');
+            const data = await res.json();
+
+            // Decode JWT để lấy user info
+            const decoded = jwtDecode(data.accessToken);
+            const userData = {
+                id: decoded.id,
+                name: decoded.name,
+                email: decoded.email,
+                role: decoded.role,
+            };
+
+            googleLogin(data.accessToken, data.refreshToken, userData);
+            redirectByRole(decoded.role); // Sử dụng role từ decoded JWT
+        } catch (err) {
+            errorNotification(err.message || 'Google login failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        googleLogout();
+    }, []);
 
     return (
         <div
-        style={{ backgroundImage: 'url("/bg.jpeg")' }}
-        className="h-screen w-screen bg-cover bg-center bg-no-repeat flex justify-center items-center"
+            style={{ backgroundImage: 'url("/bg.jpeg")' }}
+            className="h-screen w-screen bg-cover bg-center bg-no-repeat flex justify-center items-center"
         >
-            {/* Box login */}
             <div className="w-[400px] bg-white/70 backdrop-blur-md rounded-2xl shadow-2xl p-10">
                 <form className="flex flex-col gap-6" onSubmit={form.onSubmit(handleSubmit)}>
-                    {/* Title */}
                     <h1 className="text-2xl font-bold text-center text-gray-800">Đăng nhập</h1>
 
-                    {/* Inputs */}
                     <TextInput
                         withAsterisk
                         label="Email"
@@ -43,86 +109,76 @@ const LoginPage = () => {
                         radius="md"
                         placeholder="Nhập email"
                         {...form.getInputProps('email')}
+                        disabled={loading}
                     />
+
                     <div>
                         <PasswordInput
-                        withAsterisk
-                        label="Mật khẩu"
-                        variant="filled"
-                        size="md"
-                        radius="md"
-                        placeholder="Nhập mật khẩu"
-                        {...form.getInputProps('password')}
+                            withAsterisk
+                            label="Mật khẩu"
+                            variant="filled"
+                            size="md"
+                            radius="md"
+                            placeholder="Nhập mật khẩu"
+                            {...form.getInputProps('password')}
+                            disabled={loading}
                         />
                         <div className="flex justify-end mt-1">
-                        <Link to='/forgot' className="text-sm text-red-500 hover:underline">
-                            Quên mật khẩu?
-                        </Link>
+                            <Link to="/forgot" className="text-sm text-red-500 hover:underline">
+                                Quên mật khẩu?
+                            </Link>
                         </div>
                     </div>
 
-                    {/* Button login */}
                     <Button
                         type="submit"
                         fullWidth
                         radius="md"
                         size="md"
                         className="bg-red-500 hover:bg-red-600 text-white font-medium"
+                        loading={loading}
+                        loader={<Loader size="sm" />}
+                        disabled={loading}
                     >
                         Đăng nhập
                     </Button>
 
-                    {/* Hoặc */}
                     <div className="flex items-center gap-2 my-2">
                         <div className="flex-1 h-px bg-gray-300"></div>
                         <span className="text-sm text-gray-500">Hoặc</span>
                         <div className="flex-1 h-px bg-gray-300"></div>
                     </div>
 
-                    {/* Social login */}
                     <div className="flex flex-col gap-3">
-                        {/* Google */}
                         <GoogleLogin
-                        onSuccess={credentialResponse => {
-                            const idToken = credentialResponse.credential;
-                            fetch('http://localhost:9000/user/login/google', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ idToken })
-                            })
-                            .then(res => res.json())
-                            .then(user => {
-                            console.log('Google login success:', user);
-                            // Lưu user vào state/context, redirect
-                            })
-                            .catch(err => console.error('Google login error:', err));
-                        }}
-                        onError={() => console.log('Google login failed')}
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => errorNotification('Đăng nhập Google thất bại')}
+                            useOneTap={false}
+                            auto_select={false}
                         />
 
-                        {/* Facebook */}
                         <Button
-                        fullWidth
-                        radius="md"
-                        size="md"
-                        className="bg-[#1877F2] hover:bg-[#166FE5] text-white font-medium flex items-center justify-center gap-2"
-                        leftSection={<IconBrandFacebook size={18} color="white" />}
+                            fullWidth
+                            radius="md"
+                            size="md"
+                            className="bg-[#1877F2] hover:bg-[#166FE5] text-white font-medium flex items-center justify-center gap-2"
+                            leftSection={<IconBrandFacebook size={18} color="white" />}
+                            disabled={loading}
                         >
-                        Đăng nhập bằng Facebook
+                            Đăng nhập bằng Facebook
                         </Button>
                     </div>
 
-                    {/* Đăng ký */}
                     <div className="text-center text-sm mt-4">
                         <span className="text-gray-600">Chưa có tài khoản? </span>
                         <Link to="/register" className="text-red-500 font-medium hover:underline">
-                        Đăng ký ngay
+                            Đăng ký ngay
                         </Link>
                     </div>
                 </form>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default LoginPage
+export default LoginPage;

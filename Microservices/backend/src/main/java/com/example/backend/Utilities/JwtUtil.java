@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}") // Phải >=32 chars, e.g., random base64 từ openssl rand -base64 32
+    @Value("${jwt.secret}")
     private String secret;
 
     @Value("${jwt.access.expiration:3600000}") // 1h default, ms
@@ -61,9 +61,16 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    // Embed roles vào claims cho fast auth
+    // Embed id, name, email, role vào claims (email là subject nhưng nhúng thêm cho tiện)
     private Map<String, Object> getClaims(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof com.example.backend.Config.CustomUserDetails custom) {
+            claims.put("id", custom.getId());
+            claims.put("name", custom.getName());
+            claims.put("email", custom.getEmail());
+            claims.put("role", custom.getRole().name()); // Role as string
+        }
+        // Giữ roles list cho Spring Security
         claims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
@@ -76,7 +83,7 @@ public class JwtUtil {
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>(); // Không embed roles cho refresh
+        Map<String, Object> claims = new HashMap<>(); // Không embed cho refresh (hoặc embed nếu cần)
         return createToken(claims, userDetails.getUsername(), refreshExpiration);
     }
 
@@ -95,7 +102,12 @@ public class JwtUtil {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    // Helper để extract roles từ token nếu cần (không query DB)s
+    // Helper để extract role từ token (client có thể dùng tương tự)
+    public String extractRole(String token) {
+        return (String) extractClaim(token, claims -> claims.get("role"));
+    }
+
+    // Giữ extractRoles cũ nếu cần
     @SuppressWarnings("unchecked")
     public List<String> extractRoles(String token) {
         return (List<String>) extractClaim(token, claims -> claims.get("roles", List.class));
