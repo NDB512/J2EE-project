@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // ✅ Login qua email + password
+    // Login qua email + password
     const login = async (email, password) => {
         try {
             const res = await api.post("/user/login", { email, password });
@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
                     name: decoded?.name,
                     email: decoded?.email,
                     role: decoded?.role,
+                    profileId: decoded?.profileId,
                 };
 
                 dispatch(setAuth({ ...data, user: userData }));
@@ -50,7 +51,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // ✅ Login qua Google (sửa: không cần truyền user nữa, decode bên trong)
+    // Login qua Google
     const googleLogin = (accessToken, refreshToken, user) => { // Giữ param user cho tương thích, nhưng ưu tiên decode nếu cần
         const decoded = decodeToken(accessToken);
         const userData = user || {
@@ -58,13 +59,14 @@ export const AuthProvider = ({ children }) => {
             name: decoded?.name,
             email: decoded?.email,
             role: decoded?.role,
+            profileId: decoded?.profileId,
         };
 
         dispatch(setAuth({ accessToken, refreshToken, user: userData }));
         successNotification("Đăng nhập Google thành công!");
     };
 
-    // ✅ Hàm thêm mới — lưu token & user (dùng khi đăng ký)
+    // Hàm thêm mới — lưu token & user (dùng khi đăng ký)
     const saveLoginData = (accessToken, refreshToken, user) => { // Tương tự, ưu tiên decode
         const decoded = decodeToken(accessToken);
         const userData = user || {
@@ -72,19 +74,20 @@ export const AuthProvider = ({ children }) => {
             name: decoded?.name,
             email: decoded?.email,
             role: decoded?.role,
+            profileId: decoded?.profileId,
         };
 
         dispatch(setAuth({ accessToken, refreshToken, user: userData }));
         successNotification("Đăng ký thành công!");
     };
 
-    // ✅ Logout
+    // Logout
     const logout = useCallback(() => {
         dispatch(removeAuth());
         navigate("/login", { replace: true });
     }, [dispatch, navigate]);
 
-    // ✅ Refresh token
+    // Refresh token
     const refresh = useCallback(async () => {
         try {
             if (!refreshToken) return logout();
@@ -100,6 +103,7 @@ export const AuthProvider = ({ children }) => {
                     name: decoded?.name,
                     email: decoded?.email,
                     role: decoded?.role,
+                    profileId: decoded?.profileId,
                 };
 
                 dispatch(
@@ -112,22 +116,98 @@ export const AuthProvider = ({ children }) => {
                 return data.accessToken;
             }
         } catch {
+            errorNotification("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
             logout();
         }
+
     }, [refreshToken, user, dispatch, logout]);
 
-    // ✅ Auto refresh trước khi token hết hạn
+    // Auto refresh trước khi token hết hạn
     useEffect(() => {
         if (!accessToken) return;
         const decoded = decodeToken(accessToken);
         if (!decoded?.exp) return;
 
         const expiresIn = decoded.exp * 1000 - Date.now();
-        if (expiresIn > 0) {
+        if (expiresIn > 15000) {
             const timeout = setTimeout(() => refresh(), expiresIn - 10000);
             return () => clearTimeout(timeout);
         }
     }, [accessToken, refresh]);
+
+    const getPatientInfo = async (profliePatientId) => {
+        try {
+            const res = await api.get(`/profile/patient/get/${profliePatientId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Lấy thông tin bệnh nhân thất bại!");
+            throw err;
+        }
+    };
+
+    const updatePatientInfo = async (profliePatientId, info) => {
+        try {
+            const res = await api.put(`/profile/patient/update/${profliePatientId}`, info, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Cập nhật thông tin bệnh nhân thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Cập nhật thông tin bệnh nhân thất bại!");
+            throw err;
+        }
+    };
+
+    const getDoctorInfo = async (profileDoctorId) => {
+        try {
+            const res = await api.get(`/profile/doctor/get/${profileDoctorId}`, {
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Lấy thông tin bác sĩ thất bại!");
+            throw err;
+        }
+    };
+
+    const updateDoctorInfo = async (profileDoctorId, info) => {
+        try {
+            const res = await api.put(`/profile/doctor/update/${profileDoctorId}`, info, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Cập nhật thông tin bác sĩ thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Cập nhật thông tin bác sĩ thất bại!");
+            throw err;
+        }
+    };
+    
+    const getPharmacyInfo = async (pharmacyId) => {
+        try {
+            const res = await api.get(`/profile/pharmacy/get/${pharmacyId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Lấy thông tin dược sĩ thất bại!");
+            throw err;
+        }
+    };
+
+    const updatePharmacyInfo = async (pharmacyId, info) => {
+        try {
+            const res = await api.put(`/profile/pharmacy/update/${pharmacyId}`, info, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Cập nhật thông tin nhà thuốc thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Cập nhật thông tin dược sĩ thất bại!");
+            throw err;
+        }
+    };
 
     return (
         <AuthContext.Provider
@@ -137,7 +217,13 @@ export const AuthProvider = ({ children }) => {
                 refreshToken,
                 login,
                 googleLogin,
-                saveLoginData, // ✅ thêm vào context
+                saveLoginData,
+                getPatientInfo,
+                updatePatientInfo,
+                getDoctorInfo,
+                updateDoctorInfo,
+                getPharmacyInfo,
+                updatePharmacyInfo,
                 logout,
                 refresh,
             }}

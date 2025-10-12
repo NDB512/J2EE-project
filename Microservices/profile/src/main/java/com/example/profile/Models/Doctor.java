@@ -1,5 +1,7 @@
 package com.example.profile.Models;
 
+import java.time.LocalDate;
+
 import com.example.profile.Dto.DoctorDto;
 
 import jakarta.persistence.Entity;
@@ -18,13 +20,12 @@ public class Doctor {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
-    //private Long userId; // ID của user trong AuthService (nếu cần đồng bộ
-
-    private String fullName;
+    private String name;
     private String email;
     private String phone;
     private String gender;
     private String address;
+    private LocalDate dateOfBirth;
 
     // Thông tin chuyên môn
     private String specialization; // Ví dụ: "Nội tổng quát", "Nhi khoa", "Tim mạch", v.v.
@@ -43,11 +44,11 @@ public class Doctor {
     public DoctorDto toDto() {
         DoctorDto dto = new DoctorDto();
         dto.setId(this.id);
-        //dto.setUserId(this.userId);
-        dto.setFullName(this.fullName);
+        dto.setName(this.name);
         dto.setEmail(this.email);
         dto.setPhone(this.phone);
         dto.setGender(this.gender);
+        dto.setDateOfBirth(dateOfBirth);
         dto.setAddress(this.address);
         dto.setSpecialization(this.specialization);
         dto.setQualification(this.qualification);

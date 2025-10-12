@@ -14,13 +14,15 @@ public class CustomUserDetails implements UserDetails {
     private String email;
     private String password;
     private Roles role;
+    private Long profileId;
 
-    public CustomUserDetails(Long id, String name, String email, String password, Roles role) {
+    public CustomUserDetails(Long id, String name, String email, String password, Roles role, Long profileId) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.profileId = profileId;
     }
 
     // Getters
@@ -28,6 +30,7 @@ public class CustomUserDetails implements UserDetails {
     public String getName() { return name; }
     public String getEmail() { return email; }
     public Roles getRole() { return role; }
+    public Long getProfileId() { return profileId; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

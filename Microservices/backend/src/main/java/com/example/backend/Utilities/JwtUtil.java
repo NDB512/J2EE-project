@@ -68,7 +68,8 @@ public class JwtUtil {
             claims.put("id", custom.getId());
             claims.put("name", custom.getName());
             claims.put("email", custom.getEmail());
-            claims.put("role", custom.getRole().name()); // Role as string
+            claims.put("role", custom.getRole().name());
+            claims.put("profileId", custom.getProfileId());
         }
         // Giữ roles list cho Spring Security
         claims.put("roles", userDetails.getAuthorities().stream()

@@ -5,17 +5,20 @@ import { useAuth } from '../Content/AuthContext';
 import api from '../Utils/api';
 import { successNotification, errorNotification } from '../Utils/Notification';
 import { jwtDecode } from 'jwt-decode'; // Thêm import jwt-decode
+import { useNavigate } from 'react-router-dom';
 
 const RegisterPage = () => {
     const { saveLoginData } = useAuth();
+    const navigate = useNavigate();
 
     const userForm = useForm({
-        initialValues: { email: '', password: '', confirmPassword: '' },
+        initialValues: { email: '', name: '' , password: '', confirmPassword: '' },
         validate: {
             email: (v) => (/^\S+@\S+$/.test(v) ? null : 'Email không hợp lệ'),
             password: (v) => (v.length >= 6 ? null : 'Mật khẩu phải >= 6 ký tự'),
             confirmPassword: (v, vals) =>
                 v !== vals.password ? 'Mật khẩu xác nhận không khớp' : null,
+            name: (v) => (v.trim() ? null : 'Vui lòng nhập họ và tên'),
         },
     });
 
@@ -28,6 +31,7 @@ const RegisterPage = () => {
                 v !== vals.password ? 'Mật khẩu xác nhận không khớp' : null,
             licenseNumber: (v) =>
                 v.trim() ? null : 'Vui lòng nhập mã giấy phép hành nghề',
+            name: (v) => (v.trim() ? null : 'Vui lòng nhập họ và tên'),
         },
     });
 
@@ -70,42 +74,51 @@ const RegisterPage = () => {
     const handleSubmit = async (values, role) => {
         try {
             const formattedRole =
-                role === 'user'
-                    ? 'Patient'
-                    : role === 'doctor'
-                    ? 'Doctor'
-                    : role === 'pharmacy'
-                    ? 'Pharmacy'
-                    : role;
+            role === 'user'
+                ? 'Patient'
+                : role === 'doctor'
+                ? 'Doctor'
+                : role === 'pharmacy'
+                ? 'Pharmacy'
+                : role;
 
             const payload = { ...values, role: formattedRole };
-            // console.log('🚀 Đăng ký với dữ liệu:',payload)
+            // console.log('Đăng ký với dữ liệu:', payload);
 
             const res = await api.post('/user/register', payload);
             const data = res.data;
 
-            // console.log('✅ Đăng ký thành công:', data);
-
             if (data.accessToken && data.refreshToken) {
-                // Decode JWT để lấy user info
-                const decoded = jwtDecode(data.accessToken);
-                const userData = {
-                    id: decoded.id,
-                    name: decoded.name || values.email.split('@')[0], // Fallback name từ email nếu backend chưa set
-                    email: decoded.email,
-                    role: decoded.role,
-                };
+            // ✅ Giải mã JWT
+            const decoded = jwtDecode(data.accessToken);
 
-                saveLoginData(data.accessToken, data.refreshToken, userData);
+            const normalizedRole =
+                decoded.role?.startsWith('ROLE_')
+                ? decoded.role.replace('ROLE_', '')
+                : decoded.role;
+
+            const userData = {
+                id: decoded.id,
+                name: decoded.name || values.email.split('@')[0],
+                email: decoded.email,
+                role: normalizedRole,
+            };
+
+            saveLoginData(data.accessToken, data.refreshToken, userData);
+
+            // ⚠️ Delay nhẹ để Context kịp cập nhật
+            setTimeout(() => {
+                redirectByRole(userData.role);
+            }, 200);
+            } else {
+            errorNotification('Không nhận được token từ server!');
             }
-
-            redirectByRole(userData.role);
         } catch (err) {
             console.error('Lỗi đăng ký:', err);
             const msg = err?.response?.data?.message || err.message;
             errorNotification('Đăng ký thất bại: ' + msg);
         }
-    };
+        };
 
     return (
         <div
@@ -134,6 +147,12 @@ const RegisterPage = () => {
                                 label="Email"
                                 placeholder="Nhập email"
                                 {...userForm.getInputProps('email')}
+                            />
+                            <TextInput
+                                withAsterisk
+                                label="Họ và tên"
+                                placeholder="Nhập Họ và tên"
+                                {...userForm.getInputProps('name')}
                             />
                             <PasswordInput
                                 withAsterisk
@@ -168,6 +187,12 @@ const RegisterPage = () => {
                                 placeholder="Nhập email"
                                 {...doctorForm.getInputProps('email')}
                             />
+                             <TextInput
+                                withAsterisk
+                                label="Họ và tên"
+                                placeholder="Nhập Họ và tên"
+                                {...doctorForm.getInputProps('name')}
+                            />
                             <PasswordInput
                                 withAsterisk
                                 label="Mật khẩu"
@@ -184,7 +209,7 @@ const RegisterPage = () => {
                                 withAsterisk
                                 label="Mã giấy phép hành nghề"
                                 placeholder="Nhập số giấy phép"
-                                {...doctorForm.getInputProps('licenseNumber')} // Đã khớp
+                                {...doctorForm.getInputProps('licenseNumber')}
                             />
                             <Button
                                 type="submit"

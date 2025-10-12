@@ -150,7 +150,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             user.getName(), 
             user.getEmail(), 
             user.getPassword() != null ? user.getPassword() : "{noop}dummy", 
-            user.getRole()
+            user.getRole(),
+            user.getProfileId()
         );
     }
 
@@ -159,7 +160,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BeException("User not found"));
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), null, user.getLicenseNumber());
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), user.getProfileId(), user.getLicenseNumber());
     }
 
     @Override
@@ -190,6 +191,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDto getUserByEmail(String email) throws BeException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BeException("User not found"));
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), null, user.getLicenseNumber());
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), user.getProfileId(), user.getLicenseNumber());
     }
 }

@@ -29,5 +29,14 @@ public class DoctorServiceImpl implements com.example.profile.Service.DoctorServ
                 .orElseThrow(() -> new PrException("Doctor with ID " + id + " not found."))
                 .toDto();
     }
+
+    @Override
+    public DoctorDto updateDoctor(Long id, DoctorDto doctor) throws PrException {
+        doctorRepository.findById(id)
+                .orElseThrow(() -> new PrException("Doctor with ID " + id + " not found."))
+                .toDto();
+
+        return doctorRepository.save(doctor.toEntity()).toDto();
+    }
     
 }

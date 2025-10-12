@@ -33,5 +33,12 @@ public class PatientServiceImpl implements PatientService {
                 .toDto();
     }
 
-    
+    @Override
+    public PatientDto updatePatient(Long id, PatientDto patient) throws PrException {
+        patientRepository.findById(id)
+                .orElseThrow(() -> new PrException("Patient with ID " + id + " not found."))
+                .toDto();
+
+        return patientRepository.save(patient.toEntity()).toDto();
+    }
 }

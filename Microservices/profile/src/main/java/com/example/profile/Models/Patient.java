@@ -27,6 +27,7 @@ public class Patient {
     private String phone;
     private String address;
     private String email;
+    private String gender;
 
     @Column(columnDefinition = "TEXT")
     private String medicalHistory;
@@ -35,6 +36,8 @@ public class Patient {
 
     @Column(columnDefinition = "TEXT")
     private String insuranceDetails;
+
+    private String allergies;
 
     private LocalDate dateOfBirth;
 
@@ -53,6 +56,8 @@ public class Patient {
         dto.setId(this.id);
         dto.setName(this.name);
         dto.setPhone(this.phone);
+        dto.setGender(gender);
+        dto.setAllergies(this.allergies);
         dto.setAddress(this.address);
         dto.setMedicalHistory(this.medicalHistory);
         dto.setEmergencyContact(this.emergencyContact);

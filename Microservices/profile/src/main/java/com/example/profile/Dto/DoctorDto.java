@@ -1,5 +1,7 @@
 package com.example.profile.Dto;
 
+import java.time.LocalDate;
+
 import com.example.profile.Models.Doctor;
 
 import lombok.AllArgsConstructor;
@@ -11,14 +13,13 @@ import lombok.NoArgsConstructor;
 @Data
 public class DoctorDto {
     private Long id;
-
-    //private Long userId; // ID của user trong AuthService (nếu cần đồng bộ
-
-    private String fullName;
+    
+    private String name;
     private String email;
     private String phone;
     private String gender;
     private String address;
+    private LocalDate dateOfBirth;
 
     // Thông tin chuyên môn
     private String specialization; // Ví dụ: "Nội tổng quát", "Nhi khoa", "Tim mạch", v.v.
@@ -37,10 +38,11 @@ public class DoctorDto {
     public Doctor toEntity() {
         Doctor doctor = new Doctor();
         doctor.setId(this.id);
-        doctor.setFullName(this.fullName);
+        doctor.setName(this.name);
         doctor.setEmail(this.email);
         doctor.setPhone(this.phone);
         doctor.setGender(this.gender);
+        doctor.setDateOfBirth(dateOfBirth);
         doctor.setAddress(this.address);
         doctor.setSpecialization(this.specialization);
         doctor.setQualification(this.qualification);

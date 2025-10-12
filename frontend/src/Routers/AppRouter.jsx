@@ -10,6 +10,9 @@ import UnauthorizedPage from "../Pages/UnauthorizedPage";
 import PatientDashboard from "../Layout/PatientDashboard";
 import DoctorDashboard from "../Layout/DoctorDashboard";
 import PharmacyDashboard from "../Layout/PharmacyDashboard";
+import PatientProfilePage from "../Pages/Patient/PatientProfilePage";
+import DoctorProfilePage from "../Pages/Doctor/PoctorProfilePage";
+import PharmacyProfilePage from "../Pages/Pharmacy/PharmacyProfilePage";
 
 const AppRouter = () => {
   return (
@@ -26,7 +29,7 @@ const AppRouter = () => {
 
             <Route path="/patient" element={<ProtectedRoute allowedRoles={["Patient"]}> <PatientDashboard /> </ProtectedRoute>}>
                 <Route path="dashboard" element={<Random />} />
-                <Route path="profile" element={<Random />} />
+                <Route path="profile" element={<PatientProfilePage />} />
                 <Route path="appointments" element={<Random />} />
                 <Route path="pharmacy" element={<Random />} />
                 <Route path="book" element={<Random />} />
@@ -34,12 +37,15 @@ const AppRouter = () => {
 
             <Route path="/doctor" element={<ProtectedRoute allowedRoles={["Doctor"]}> <DoctorDashboard /> </ProtectedRoute>}>
                 <Route path="dashboard" element={<Random />} />
+                <Route path="profile" element={<DoctorProfilePage />} />
                 <Route path="patients" element={<Random />} />
                 <Route path="appointments" element={<Random />} />
+                <Route path="prescriptions" element={<Random />} />
             </Route>
 
             <Route path="/pharmacy" element={<ProtectedRoute allowedRoles={["Pharmacy"]}> <PharmacyDashboard /> </ProtectedRoute>}>
                 <Route path="dashboard" element={<Random />} />
+                <Route path="profile" element={<PharmacyProfilePage />} />
                 <Route path="prescriptions" element={<Random />} />
                 <Route path="inventory" element={<Random />} />
             </Route>

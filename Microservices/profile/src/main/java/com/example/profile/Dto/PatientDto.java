@@ -22,6 +22,7 @@ public class PatientDto {
     private String phone;
     private String address;
     private String email;
+    private String gender;
     private String medicalHistory;
     private String emergencyContact;
     private String insuranceDetails;
@@ -42,9 +43,11 @@ public class PatientDto {
         patient.setId(id);
         patient.setName(name);
         patient.setPhone(phone);
+        patient.setGender(gender);
         patient.setAddress(address);
         patient.setEmail(email);
         patient.setCitizenId(citizenId);
+        patient.setAllergies(allergies);
         patient.setMedicalHistory(medicalHistory);
         patient.setEmergencyContact(emergencyContact);
         patient.setInsuranceDetails(insuranceDetails);

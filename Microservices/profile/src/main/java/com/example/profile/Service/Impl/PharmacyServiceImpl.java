@@ -31,4 +31,12 @@ public class PharmacyServiceImpl implements PharmacyService {
                 .orElseThrow(() -> new PrException("Pharmacy with ID " + id + " not found."))
                 .toDto();
     }
+    @Override
+    public PharmacyDto updatePharmacy(Long id, PharmacyDto pharmacy) throws PrException {
+        pharmacyRepository.findById(id)
+                .orElseThrow(() -> new PrException("Pharmacy with ID " + id + " not found."))
+                .toDto();
+
+        return pharmacyRepository.save(pharmacy.toEntity()).toDto();
+    }
 }

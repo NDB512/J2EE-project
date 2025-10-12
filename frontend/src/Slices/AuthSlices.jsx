@@ -24,6 +24,7 @@ const initialUser = storedUser
         name: safeDecode(storedAccess)?.name,
         email: safeDecode(storedAccess)?.email,
         role: safeDecode(storedAccess)?.role,
+        profileId: safeDecode(storedAccess)?.profileId,
     }
     : null;
 
@@ -49,6 +50,7 @@ const authSlice = createSlice({
                 name: decoded?.name,
                 email: decoded?.email,
                 role: decoded?.role,
+                profileId: decoded?.profileId,
             };
 
             state.accessToken = accessToken;

@@ -11,7 +11,7 @@ import { Avatar } from "@mantine/core";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../../Content/AuthContext";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen }) => {
     const { user } = useAuth();
 
     // Các menu cố định cho bệnh nhân
@@ -22,8 +22,10 @@ const Sidebar = () => {
         { name: "Nhà thuốc", href: "/patient/pharmacy", icon: <IconVaccine size={20} /> },
     ];
 
+    if (!isOpen) return null;
+
     return (
-        <aside className="w-64 h-screen bg-red-100 flex flex-col justify-between py-6 border-r border-red-300">
+        <aside className="w-64 h-screen bg-red-100 flex flex-col justify-between py-6 border-r border-red-300 overflow-y-auto">
             {/* --- Logo & thông tin người dùng --- */}
             <div className="flex flex-col gap-8 items-center">
                 {/* Logo */}

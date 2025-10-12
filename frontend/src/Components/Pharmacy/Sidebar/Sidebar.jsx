@@ -12,17 +12,20 @@ import { useAuth } from "../../../Content/AuthContext";
 // Menu cho nhà thuốc
 const allLinks = {
     pharmacy: [
+        { name: "Hồ sơ", href: "/pharmacy/profile", icon: <IconHeartbeat size={20} /> },
         { name: "Đơn thuốc", href: "/pharmacy/prescriptions", icon: <IconVaccine size={20} /> },
         { name: "Kho thuốc", href: "/pharmacy/inventory", icon: <IconLayoutGrid size={20} /> },
     ],
 };
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen })  => {
     const { user } = useAuth();
 
-    // 🔸 Lấy role (nếu chưa có thì mặc định là pharmacy)
+    // Lấy role (nếu chưa có thì mặc định là pharmacy)
     const role = user?.role?.toLowerCase() || "pharmacy";
     const links = allLinks[role] || [];
+
+    if (!isOpen) return null;
 
     return (
         <aside className="w-64 h-screen bg-red-100 flex flex-col justify-between py-6 border-r border-red-300">

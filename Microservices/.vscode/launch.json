@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "AppointmentApplication",
+            "request": "launch",
+            "mainClass": "com.example.appointment.AppointmentApplication"
+        },
+        {
+            "type": "java",
             "name": "ProfileApplication",
             "request": "launch",
             "mainClass": "com.example.profile.profile.ProfileApplication"

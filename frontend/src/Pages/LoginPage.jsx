@@ -35,7 +35,7 @@ const LoginPage = () => {
             case 'Pharmacy':
                 navigate('/pharmacy');
                 break;
-            case 'Admin': // Sửa từ 'Aamin' thành 'Admin'
+            case 'Admin':
                 navigate('/admin');
                 break;
             default:
@@ -77,6 +77,7 @@ const LoginPage = () => {
                 name: decoded.name,
                 email: decoded.email,
                 role: decoded.role,
+                profileId: decoded.profileId,
             };
 
             googleLogin(data.accessToken, data.refreshToken, userData);
