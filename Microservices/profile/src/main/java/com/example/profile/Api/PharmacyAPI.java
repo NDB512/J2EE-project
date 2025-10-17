@@ -34,4 +34,9 @@ public class PharmacyAPI {
     public ResponseEntity<PharmacyDto> updatePharmacy(@PathVariable Long id, @RequestBody PharmacyDto pharmacy) throws PrException {
         return new ResponseEntity<>(PharmacyService.updatePharmacy(id, pharmacy), HttpStatus.OK);
     }
+
+    @GetMapping("/exists/{id}")
+    public Boolean pharmacyExists(Long id){
+        return pharmacyExists(id);
+    }
 }

@@ -1,5 +1,7 @@
 package com.example.profile.Api;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.profile.Dto.DoctorDropdown;
 import com.example.profile.Dto.DoctorDto;
 import com.example.profile.Exception.PrException;
 import com.example.profile.Service.DoctorService;
@@ -35,4 +38,15 @@ public class DoctorAPI {
     public ResponseEntity<DoctorDto> updateDoctor(@PathVariable Long id, @RequestBody DoctorDto doctor) throws PrException {
         return new ResponseEntity<>(DoctorService.updateDoctor(id, doctor), HttpStatus.OK);
     }
+
+    @GetMapping("/exists/{id}")
+    public Boolean doctorExists(@PathVariable Long id) {
+        return DoctorService.doctorExists(id);
+    }
+
+    @GetMapping("/dropdowns")
+    public ResponseEntity<List<DoctorDropdown>> getDoctorDropdowns() throws PrException{
+        return new ResponseEntity<>(DoctorService.getDoctorDropdowns(), HttpStatus.OK);
+    }
+
 }

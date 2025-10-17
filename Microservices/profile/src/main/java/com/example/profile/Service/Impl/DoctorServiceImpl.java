@@ -1,8 +1,11 @@
 package com.example.profile.Service.Impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.profile.Dto.DoctorDropdown;
 import com.example.profile.Dto.DoctorDto;
 import com.example.profile.Exception.PrException;
 
@@ -37,6 +40,16 @@ public class DoctorServiceImpl implements com.example.profile.Service.DoctorServ
                 .toDto();
 
         return doctorRepository.save(doctor.toEntity()).toDto();
+    }
+
+    @Override
+    public Boolean doctorExists(Long id) {
+        return doctorRepository.existsById(id);
+    }
+
+    @Override
+    public List<DoctorDropdown> getDoctorDropdowns() throws PrException{
+        return doctorRepository.findAllDoctorDropdowns();
     }
     
 }

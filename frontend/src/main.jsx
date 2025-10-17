@@ -8,6 +8,9 @@ import { Provider } from 'react-redux'
 import Store from './Store.jsx'
 import { BrowserRouter } from 'react-router-dom'
 
+import "primereact/resources/themes/lara-light-cyan/theme.css";
+
+
 createRoot(document.getElementById('root')).render(
   <Provider store={Store}>
     <StrictMode>

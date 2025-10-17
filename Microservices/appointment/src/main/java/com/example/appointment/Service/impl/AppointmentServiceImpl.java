@@ -6,8 +6,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.appointment.Clients.ProfileClient;
+import com.example.appointment.Dto.AppointmentDetails;
 import com.example.appointment.Dto.AppointmentDto;
 import com.example.appointment.Dto.AppointmentStatus;
+import com.example.appointment.Dto.DoctorDto;
+import com.example.appointment.Dto.PatientDto;
+import com.example.appointment.Exception.ApException;
 import com.example.appointment.Models.Appointment;
 import com.example.appointment.Repository.AppointmentRepository;
 import com.example.appointment.Service.AppointmentService;
@@ -23,6 +28,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private AppointmentRepository repository;
+
+    @Autowired
+    private ProfileClient profileClient;
 
     private AppointmentDto toDto(Appointment entity) {
         AppointmentDto dto = new AppointmentDto();
@@ -63,7 +71,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public AppointmentDto createAppointment(AppointmentDto dto) {
+    public AppointmentDto createAppointment(AppointmentDto dto) throws ApException {
+        Boolean doctorExists = profileClient.doctorExists(dto.getDoctorId());
+        Boolean patientExists = profileClient.patientExists(dto.getPatientId());
+
+        if (doctorExists == null || !doctorExists) {
+            throw new ApException("Bác sĩ với ID " + dto.getDoctorId() + " không tồn tại.");
+        }
+        if(patientExists == null || !patientExists) {
+            throw new ApException("Bệnh nhân với ID " + dto.getPatientId() + " không tồn tại.");
+        }
+
         Appointment entity = toEntity(dto);
         if (entity.getStatus() == null)
             entity.setStatus(AppointmentStatus.PENDING);
@@ -98,5 +116,34 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Không tìm thấy cuộc hẹn ID: " + id);
         }
         repository.deleteById(id);
+    }
+
+    @Override
+    public AppointmentDetails getAppointmentDetailsWithName(Long id) throws ApException {
+        AppointmentDto dto = this.getAppointmentById(id)
+                .orElseThrow(() -> new ApException("Không tìm thấy cuộc hẹn ID: " + id));
+        
+        DoctorDto doctor = profileClient.getDoctorById(dto.getDoctorId());
+        if (doctor == null) {
+            throw new ApException("Không tìm thấy bác sĩ với ID: " + dto.getDoctorId());
+        }
+
+        PatientDto patient = profileClient.getPatientById(dto.getPatientId());
+        if (patient == null) {
+            throw new ApException("Không tìm thấy bệnh nhân với ID: " + dto.getPatientId());
+        }
+
+        return new AppointmentDetails(
+            dto.getId(),
+            dto.getPatientId(),
+            patient.getName(),
+            dto.getDoctorId(),
+            doctor.getName(),
+            dto.getAppointmentDate(),
+            dto.getReason(),
+            dto.getNotes(),
+            dto.getStatus(),
+            dto.getLocation()
+        );
     }
 }

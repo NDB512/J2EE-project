@@ -2,6 +2,12 @@
     "configurations": [
         {
             "type": "java",
+            "name": "EurekaApplication",
+            "request": "launch",
+            "mainClass": "com.example.eureka.EurekaApplication"
+        },
+        {
+            "type": "java",
             "name": "AppointmentApplication",
             "request": "launch",
             "mainClass": "com.example.appointment.AppointmentApplication"
@@ -57,6 +63,26 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.profile.ProfileApplication",
             "projectName": "profile",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-AppointmentApplication<appointment>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.appointment.AppointmentApplication",
+            "projectName": "appointment",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-EurekaApplication<eureka>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.eureka.EurekaApplication",
+            "projectName": "eureka",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

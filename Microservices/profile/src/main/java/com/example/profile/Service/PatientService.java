@@ -7,4 +7,5 @@ public interface PatientService {
     public Long addPaient(PatientDto patient) throws PrException;
     public PatientDto getPatientById(Long id) throws PrException;
     public PatientDto updatePatient(Long id, PatientDto patient) throws PrException;
+    public Boolean patientExists(Long id);
 }

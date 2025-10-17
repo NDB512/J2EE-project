@@ -209,6 +209,119 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const getDoctorDropdown = async () => {
+        try {
+            const res = await api.get("/profile/doctor/dropdowns", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách bác sĩ!");
+            throw err;
+        }
+    };
+
+    const createAppointment = async (appointmentData) => {
+        try {
+            const res = await api.post("/appointment", appointmentData, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Đặt lịch khám thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Đặt lịch khám thất bại!");
+            throw err;
+        }
+    };
+
+    const getAllAppointments = async () => {
+        try {
+            const res = await api.get("/appointment", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách lịch hẹn!");
+            throw err;
+        }
+    };
+
+    const getAppointmentById = async (id) => {
+        try {
+            const res = await api.get(`/appointment/${id}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải chi tiết lịch hẹn!");
+            throw err;
+        }
+    };
+
+    const getAppointmentsByPatient = async (patientId) => {
+        try {
+            const res = await api.get(`/appointment/patient/${patientId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách lịch hẹn của bệnh nhân!");
+            throw err;
+        }
+    };
+
+    const getAppointmentsByDoctor = async (doctorId) => {
+        try {
+            const res = await api.get(`/appointment/doctor/${doctorId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách lịch hẹn của bác sĩ!");
+            throw err;
+        }
+    };
+
+    const updateAppointment = async (id, appointmentData) => {
+        try {
+            const res = await api.put(`/appointment/${id}`, appointmentData, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Cập nhật lịch hẹn thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Cập nhật lịch hẹn thất bại!");
+            throw err;
+        }
+    };
+
+    const updateAppointmentStatus = async (id, status) => {
+        try {
+            const res = await api.patch(`/appointment/${id}/status`, null, {
+                params: { status }, // vì backend dùng @RequestParam
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Cập nhật trạng thái lịch hẹn thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Cập nhật trạng thái thất bại!");
+            throw err;
+        }
+    };
+
+    const getAppointmentDetailsWithName = async (id) => {
+        try {
+            const res = await api.get(`/appointment/details/${id}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải thông tin chi tiết lịch hẹn!");
+            throw err;
+        }
+    };
+
+
     return (
         <AuthContext.Provider
             value={{
@@ -224,6 +337,15 @@ export const AuthProvider = ({ children }) => {
                 updateDoctorInfo,
                 getPharmacyInfo,
                 updatePharmacyInfo,
+                getDoctorDropdown,
+                createAppointment,
+                getAllAppointments,
+                getAppointmentById,
+                getAppointmentsByPatient,
+                getAppointmentsByDoctor,
+                updateAppointment,
+                updateAppointmentStatus,
+                getAppointmentDetailsWithName,
                 logout,
                 refresh,
             }}

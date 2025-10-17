@@ -1,7 +1,6 @@
 package com.example.backend.Services.impl;
 
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,8 +16,8 @@ import com.example.backend.Dto.UserDto;
 import com.example.backend.Exception.BeException;
 import com.example.backend.Models.User;
 import com.example.backend.Repositories.UserRepository;
-import com.example.backend.Services.ApiService;
 import com.example.backend.Services.UserService;
+import com.example.backend.Clients.ProfileClient;
 import com.example.backend.Utilities.JwtUtil;
 
 @Service
@@ -35,7 +34,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private ApiService apiService;
+    private ProfileClient profileClient;
 
     @Override
     @Transactional
@@ -52,12 +51,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         // Encode password
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+
         Long profileId;
         try {
-            profileId = apiService.addProfile(userDto, null).block();  // Null token cho register
+            switch (userDto.getRole()) {
+                case Doctor -> profileId = profileClient.addDoctor(userDto);
+                case Pharmacy -> profileId = profileClient.addPharmacy(userDto);
+                case Patient -> profileId = profileClient.addPatient(userDto);
+                default -> throw new BeException("Invalid role");
+            }
+
             if (profileId == null || profileId == -1L) {
                 throw new BeException("Failed to create profile");
             }
+
         } catch (Exception e) {
             throw new BeException("Profile creation failed: " + e.getMessage());
         }
@@ -120,10 +127,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     userDto.setRole(Roles.Patient);
                     return userRepository.save(newUser);
                 });
-        
+
         Long profileId;
         try {
-            profileId = apiService.addProfile(userDto, null).block();  // Null token cho register
+            profileId = profileClient.addDoctor(userDto);  // Null token cho register
             if (profileId == null || profileId == -1L) {
                 throw new BeException("Failed to create profile");
             }

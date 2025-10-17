@@ -39,4 +39,9 @@ public class PharmacyServiceImpl implements PharmacyService {
 
         return pharmacyRepository.save(pharmacy.toEntity()).toDto();
     }
+
+    @Override
+    public Boolean pharmacyExists(Long id) {
+        return pharmacyRepository.existsById(id);
+    }
 }

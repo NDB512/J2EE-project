@@ -35,4 +35,9 @@ public class PatientAPI {
     public ResponseEntity<PatientDto> updatePatient(@PathVariable Long id, @RequestBody PatientDto patient) throws PrException {
         return new ResponseEntity<>(patientService.updatePatient(id, patient), HttpStatus.OK);
     }
+
+    @GetMapping("/exists/{id}")
+    public Boolean patientExists(@PathVariable Long id) {
+        return patientService.patientExists(id);
+    }
 }

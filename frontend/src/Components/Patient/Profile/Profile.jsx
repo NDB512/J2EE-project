@@ -97,7 +97,7 @@ const Profile = () => {
     };
 
     // Lấy tên hiển thị: ưu tiên name, nếu không có thì lấy phần trước @ của email, nếu không có email thì hiện "Khách"
-    const userName = formData.name || user?.name || user?.email?.split('@')[0] || 'Khách';
+    const userName = formData?.name || user?.name || user?.email?.split('@')[0] || 'Khách';
 
     if (!formData) return <div className="p-10">Đang tải...</div>;
     if (loading) return <div className="p-10">Đang tải thông tin...</div>;
@@ -161,18 +161,16 @@ const Profile = () => {
                         <Table.Td className="text-lg">
                             {editMode ? (
                             <DateInput
-                                value={new Date(formData.dateOfBirth)}
-                                onChange={(value) =>
-                                handleChange('dateOfBirth', value?.toISOString().split('T')[0])
-                                }
+                                value={formData.dateOfBirth ? new Date(formData.dateOfBirth) : null}
+                                onChange={(value) => handleChange('dateOfBirth', value || null)}
                                 valueFormat="DD/MM/YYYY"
                                 label="Chọn ngày sinh"
                                 clearable
                             />
                             ) : (
-                            new Date(formData.dateOfBirth).toLocaleDateString('vi-VN')
+                                new Date(formData.dateOfBirth).toLocaleDateString('vi-VN')
                             )}
-                    </Table.Td>
+                        </Table.Td>
                     </Table.Tr>
 
                     {/* Số điện thoại */}

@@ -30,6 +30,7 @@ public class Appointment {
     private String reason;        // Lý do khám
     private String notes;         // Ghi chú thêm
 
+    @Enumerated(EnumType.STRING)
     private AppointmentStatus status;  // Trạng thái cuộc hẹn
 
     private String location;      // Tùy chọn: địa chỉ khám / phòng khám

@@ -5,6 +5,7 @@ import { createTheme, MantineProvider } from '@mantine/core'
 import AppRouter from './Routers/AppRouter'
 import { Notifications } from '@mantine/notifications'
 import '@mantine/notifications/styles.css'
+import { PrimeReactProvider } from 'primereact/api';
 
 
 const theme = createTheme({
@@ -26,8 +27,10 @@ function App() {
 
   return (
     <MantineProvider theme={theme}>
-      <Notifications />
-      <AppRouter />
+      <PrimeReactProvider>
+        <Notifications />
+        <AppRouter />
+      </PrimeReactProvider>
     </MantineProvider>
   )
 }

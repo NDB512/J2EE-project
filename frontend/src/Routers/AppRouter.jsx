@@ -13,6 +13,7 @@ import PharmacyDashboard from "../Layout/PharmacyDashboard";
 import PatientProfilePage from "../Pages/Patient/PatientProfilePage";
 import DoctorProfilePage from "../Pages/Doctor/PoctorProfilePage";
 import PharmacyProfilePage from "../Pages/Pharmacy/PharmacyProfilePage";
+import PatientAppointmentPage from "../Pages/Patient/PatientAppointmentPage";
 
 const AppRouter = () => {
   return (
@@ -30,7 +31,7 @@ const AppRouter = () => {
             <Route path="/patient" element={<ProtectedRoute allowedRoles={["Patient"]}> <PatientDashboard /> </ProtectedRoute>}>
                 <Route path="dashboard" element={<Random />} />
                 <Route path="profile" element={<PatientProfilePage />} />
-                <Route path="appointments" element={<Random />} />
+                <Route path="appointments" element={<PatientAppointmentPage />} />
                 <Route path="pharmacy" element={<Random />} />
                 <Route path="book" element={<Random />} />
             </Route>
