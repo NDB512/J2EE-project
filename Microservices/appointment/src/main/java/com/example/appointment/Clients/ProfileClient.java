@@ -1,11 +1,15 @@
 package com.example.appointment.Clients;
 
+import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.appointment.Config.FeignInternalInterceptorConfig;
 import com.example.appointment.Dto.DoctorDto;
+import com.example.appointment.Dto.DoctorName;
 import com.example.appointment.Dto.PatientDto;
 
 @FeignClient(name = "profile", configuration = FeignInternalInterceptorConfig.class)
@@ -22,4 +26,8 @@ public interface ProfileClient {
 
     @GetMapping("/profile/patient/get/{id}")
     PatientDto getPatientById(@PathVariable("id") Long id);
+
+    @GetMapping("/profile/doctor/getDoctorsById")
+    List<DoctorName> getDoctorsById(@RequestParam List<Long> ids);
+
 }

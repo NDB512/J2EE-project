@@ -3,7 +3,6 @@ package com.example.appointment.Service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.appointment.Clients.ProfileClient;
@@ -17,6 +16,7 @@ import com.example.appointment.Models.Appointment;
 import com.example.appointment.Repository.AppointmentRepository;
 import com.example.appointment.Service.AppointmentService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,11 +26,9 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {
 
-    @Autowired
-    private AppointmentRepository repository;
+    private final AppointmentRepository repository;
 
-    @Autowired
-    private ProfileClient profileClient;
+    private final ProfileClient profileClient;
 
     private AppointmentDto toDto(Appointment entity) {
         AppointmentDto dto = new AppointmentDto();
@@ -54,20 +52,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public Optional<AppointmentDto> getAppointmentById(Long id) {
         return repository.findById(id).map(this::toDto);
-    }
-
-    @Override
-    public List<AppointmentDto> getByPatient(Long patientId) {
-        return repository.findByPatientId(patientId).stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<AppointmentDto> getByDoctor(Long doctorId) {
-        return repository.findByDoctorId(doctorId).stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -103,11 +87,87 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public AppointmentDto updateStatus(Long id, AppointmentStatus newStatus) {
+    public AppointmentDto updateStatus(Long id, AppointmentStatus newStatus, String reason, LocalDateTime newDateTime) throws ApException {
         Appointment existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy cuộc hẹn ID: " + id));
+                .orElseThrow(() -> new ApException("Không tìm thấy cuộc hẹn ID: " + id));
+
+        AppointmentStatus currentStatus = existing.getStatus();
+
+        // Kiểm tra trạng thái hợp lệ
+        if (!isValidStatusTransition(currentStatus, newStatus)) {
+            throw new ApException("Không thể chuyển từ " + currentStatus + " sang " + newStatus);
+        }
+
+        // Nếu hủy hoặc đổi lịch → bắt buộc nhập lý do
+        if ((newStatus == AppointmentStatus.CANCELLED || newStatus == AppointmentStatus.RESCHEDULED)
+                && (reason == null || reason.trim().isEmpty())) {
+            throw new ApException("Cần nhập lý do khi hủy hoặc đổi lịch cuộc hẹn");
+        }
+
+        // Nếu đổi lịch → cần ngày giờ mới
+        if (newStatus == AppointmentStatus.RESCHEDULED) {
+            if (newDateTime == null) {
+                throw new ApException("Vui lòng chọn ngày và giờ hẹn mới");
+            }
+            if (newDateTime.isBefore(LocalDateTime.now())) {
+                throw new ApException("Không thể chọn ngày giờ trong quá khứ");
+            }
+
+            existing.setAppointmentDate(newDateTime);
+        }
+
+        // Nếu bác sĩ xác nhận lịch → tự động cập nhật nơi khám
+        if (newStatus == AppointmentStatus.SCHEDULED) {
+            DoctorDto doctor = profileClient.getDoctorById(existing.getDoctorId());
+            if (doctor == null) {
+                throw new ApException("Không tìm thấy bác sĩ với ID: " + existing.getDoctorId());
+            }
+
+            String location = doctor.getHospitalName();
+            if (doctor.getDepartment() != null && !doctor.getDepartment().isEmpty()) {
+                location += " - " + doctor.getDepartment();
+            }
+
+            existing.setLocation(location);
+        }
+
+        // Nếu hoàn thành → cập nhật thời gian hoàn thành
+        if (newStatus == AppointmentStatus.COMPLETED) {
+            existing.setCompletedAt(LocalDateTime.now());
+        }
+
         existing.setStatus(newStatus);
-        return toDto(repository.save(existing));
+        existing.setStatusReason(reason);
+
+        existing = repository.save(existing);
+        return toDto(existing);
+    }
+
+
+    /**
+     * Kiểm tra xem có được phép chuyển trạng thái không.
+     */
+    private boolean isValidStatusTransition(AppointmentStatus current, AppointmentStatus target) {
+        switch (current) {
+            case PENDING:
+                return target == AppointmentStatus.SCHEDULED ||
+                    target == AppointmentStatus.CANCELLED;
+            case SCHEDULED:
+                return target == AppointmentStatus.RESCHEDULED ||
+                    target == AppointmentStatus.COMPLETED ||
+                    target == AppointmentStatus.CANCELLED ||
+                    target == AppointmentStatus.NO_SHOW;
+            case RESCHEDULED:
+                return target == AppointmentStatus.SCHEDULED ||
+                    target == AppointmentStatus.CANCELLED;
+            case COMPLETED:
+            case CANCELLED:
+            case NO_SHOW:
+                // Các trạng thái kết thúc không thể thay đổi
+                return false;
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -143,7 +203,60 @@ public class AppointmentServiceImpl implements AppointmentService {
             dto.getReason(),
             dto.getNotes(),
             dto.getStatus(),
-            dto.getLocation()
+            dto.getLocation(),
+            dto.getStatusReason(),
+            dto.getCompletedAt(),
+            dto.getCancelledAt()
         );
+    }
+
+    @Override
+    public List<AppointmentDetails> getAllAppointmentsByPatientId(Long patientId) throws ApException {
+        return repository.findAllByPatientId(patientId).stream()
+            .map(appointment -> {
+                try {
+                    DoctorDto doctorDTO = profileClient.getDoctorById(appointment.getDoctorId());
+                    appointment.setDoctorName(doctorDTO.getName());
+                } catch (Exception e) {
+                    appointment.setDoctorName("Không xác định");
+                }
+                return appointment;
+            })
+            .toList();
+    }
+
+    @Override
+    public List<AppointmentDetails> getAllAppointmentsByDoctorId(Long doctorId) throws ApException {
+        return repository.findAllByDoctorId(doctorId).stream()
+            .map(appointment -> {
+                try {
+                    PatientDto DTO = profileClient.getPatientById(appointment.getDoctorId());
+                    appointment.setPatientName(DTO.getName());
+                } catch (Exception e) {
+                    appointment.setPatientName("Không xác định");
+                }
+                return appointment;
+            })
+            .toList();
+    }
+
+   @Override
+    public void cancelAppointment(Long id, String reason) {
+        Appointment appointment = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy cuộc hẹn ID: " + id));
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new RuntimeException("Không thể hủy cuộc hẹn đã hoàn thành!");
+        }
+
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new RuntimeException("Cần nhập lý do khi hủy cuộc hẹn!");
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointment.setStatusReason(reason);
+        appointment.setCancelledAt(LocalDateTime.now());
+
+        repository.save(appointment);
     }
 }

@@ -3,7 +3,6 @@ package com.example.appointment.Dto;
 import java.time.LocalDateTime;
 
 import com.example.appointment.Models.Appointment;
-
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -15,18 +14,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AppointmentDto {
     private Long id;
-
-    private Long patientId;       // ID bệnh nhân
-    private Long doctorId;        // ID bác sĩ
-    private LocalDateTime appointmentDate; // Ngày giờ hẹn
-
-    private String reason;        // Lý do khám
-    private String notes;         // Ghi chú thêm
+    private Long patientId;
+    private Long doctorId;
+    private LocalDateTime appointmentDate;
+    private String reason;
+    private String notes;
 
     @Enumerated(EnumType.STRING)
-    private AppointmentStatus status;  // Trạng thái cuộc hẹn
+    private AppointmentStatus status;
 
-    private String location;      // Tùy chọn: địa chỉ khám / phòng khám
+    private String location;
+    private String statusReason;
+    private LocalDateTime completedAt;
+    private LocalDateTime cancelledAt;
 
     public Appointment toEntity() {
         return new Appointment(
@@ -37,7 +37,10 @@ public class AppointmentDto {
             this.reason,
             this.notes,
             this.status,
-            this.location
+            this.location,
+            this.statusReason,
+            this.completedAt,
+            this.cancelledAt
         );
     }
 }

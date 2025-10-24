@@ -89,7 +89,7 @@ const RegisterPage = () => {
             const data = res.data;
 
             if (data.accessToken && data.refreshToken) {
-            // ✅ Giải mã JWT
+            // Giải mã JWT
             const decoded = jwtDecode(data.accessToken);
 
             const normalizedRole =
@@ -106,7 +106,7 @@ const RegisterPage = () => {
 
             saveLoginData(data.accessToken, data.refreshToken, userData);
 
-            // ⚠️ Delay nhẹ để Context kịp cập nhật
+            // Delay nhẹ để Context kịp cập nhật
             setTimeout(() => {
                 redirectByRole(userData.role);
             }, 200);
@@ -134,7 +134,7 @@ const RegisterPage = () => {
                     <Tabs.List grow>
                         <Tabs.Tab value="user">Người dùng</Tabs.Tab>
                         <Tabs.Tab value="doctor">Bác sĩ</Tabs.Tab>
-                        <Tabs.Tab value="pharmacy">Nhà thuốc</Tabs.Tab>
+                        {/* <Tabs.Tab value="pharmacy">Nhà thuốc</Tabs.Tab> */}
                     </Tabs.List>
 
                     <Tabs.Panel value="user" pt="xs">
@@ -250,7 +250,7 @@ const RegisterPage = () => {
                                 withAsterisk
                                 label="Giấy phép nhà thuốc"
                                 placeholder="Giấy phép nhà thuốc"
-                                {...pharmacyForm.getInputProps('licenseNumber')} // Đã khớp
+                                {...pharmacyForm.getInputProps('licenseNumber')}
                             />
                             <Button
                                 type="submit"

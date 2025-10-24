@@ -54,5 +54,159 @@ const visitReasons = [
   "Khác"
 ];
 
+const Symptoms = [
+  "Sốt",
+  "Ho",
+  "Đau đầu",
+  "Đau họng",
+  "Mệt mỏi",
+  "Khó thở",
+  "Đau ngực",
+  "Chóng mặt",
+  "Buồn nôn",
+  "Nôn mửa",
+  "Tiêu chảy",
+  "Đau bụng",
+  "Đau lưng",
+  "Đau khớp",
+  "Đau cơ",
+  "Phát ban",
+  "Ngứa da",
+  "Chảy nước mũi",
+  "Nghẹt mũi",
+  "Ho khan",
+  "Ho có đờm",
+  "Mất vị giác",
+  "Mất khứu giác",
+  "Khó ngủ",
+  "Hụt hơi khi gắng sức",
+  "Chán ăn",
+  "Đổ mồ hôi nhiều",
+  "Đau tai",
+  "Ù tai",
+  "Sưng hạch",
+  "Đau mắt",
+  "Chảy nước mắt",
+  "Khó nuốt",
+  "Khàn giọng",
+  "Tim đập nhanh",
+  "Cảm giác hồi hộp",
+  "Sưng khớp",
+  "Run tay",
+  "Khó tập trung",
+  "Cảm giác lo âu",
+  "Đau rát khi tiểu",
+  "Tiểu nhiều",
+  "Tiểu ít",
+  "Tiểu buốt",
+  "Tiểu ra máu",
+  "Khó chịu vùng bụng dưới",
+  "Khó chịu vùng ngực",
+  "Khó chịu vùng cổ",
+  "Khó chịu vùng lưng"
+];
 
-export { bloodGroups, genders, maritalStatuses, doctorSpecializations, visitReasons };
+const Tests = [
+  // Xét nghiệm máu
+  "Công thức máu (CBC)",
+  "Đường huyết (Glucose)",
+  "HbA1C (Đánh giá tiểu đường)",
+  "Mỡ máu (Cholesterol, Triglycerid)",
+  "Men gan (AST, ALT)",
+  "Ure, Creatinin (Chức năng thận)",
+  "Ion đồ (Na+, K+, Cl-, Ca2+)",
+  "CRP (C-reactive protein)",
+  "Hồng cầu, bạch cầu, tiểu cầu",
+
+  // Xét nghiệm nước tiểu
+  "Tổng phân tích nước tiểu",
+  "Tìm protein trong nước tiểu",
+  "Tìm glucose trong nước tiểu",
+
+  // Xét nghiệm vi sinh
+  "Xét nghiệm vi khuẩn HP",
+  "Xét nghiệm COVID-19 (PCR)",
+  "Test cúm nhanh",
+  "Xét nghiệm lao (Mantoux, IGRA)",
+  "Xét nghiệm viêm gan B",
+  "Xét nghiệm viêm gan C",
+  "Xét nghiệm HIV",
+  "Cấy máu",
+  "Cấy nước tiểu",
+  "Cấy đờm",
+
+  // Xét nghiệm nội tiết
+  "TSH, FT4 (Tuyến giáp)",
+  "Test testosterone",
+  "Estrogen, Progesterone",
+  "Cortisol máu",
+
+  // Hình ảnh học (chẩn đoán bằng hình ảnh)
+  "X-quang phổi",
+  "Siêu âm bụng tổng quát",
+  "Siêu âm tim",
+  "Siêu âm tuyến giáp",
+  "CT Scanner",
+  "MRI (Cộng hưởng từ)",
+  "Điện tâm đồ (ECG)",
+  "Điện não đồ (EEG)",
+  "Đo mật độ xương",
+
+  // Khác
+  "Test dị ứng",
+  "Test máu ẩn trong phân",
+  "Xét nghiệm ký sinh trùng",
+  "Xét nghiệm Pap smear (Tế bào cổ tử cung)",
+  "Xét nghiệm tinh dịch đồ"
+];
+
+const dosagePatternOptions = [
+   // Uống 1 lần/ngày
+  { value: "Sáng", label: "Sáng" },
+  { value: "Trưa", label: "Trưa" },
+  { value: "Tối", label: "Tối" },
+
+  // Uống 2 lần/ngày
+  { value: "Sáng - Trưa", label: "Sáng - Trưa" },
+  { value: "Sáng - Tối", label: "Sáng - Tối" },
+  { value: "Trưa - Tối", label: "Trưa - Tối" },
+
+  // Uống 3 lần/ngày
+  { value: "Sáng - Trưa - Tối", label: "Sáng - Trưa - Tối" },
+
+  // Uống 4 lần/ngày
+  { value: "Sáng - Trưa - Tối - Khuya", label: "Sáng - Trưa - Tối - Khuya" },
+
+  // Đặc biệt
+  { value: "Sáng - Tối (bỏ trưa, khuya)", label: "Sáng - Tối (bỏ trưa, khuya)" },
+  { value: "Trưa - Khuya", label: "Trưa - Khuya" },
+  { value: "Sáng - Khuya", label: "Sáng - Khuya" },
+
+  // Theo chỉ định
+  { value: "Theo chỉ định bác sĩ", label: "Theo chỉ định bác sĩ" },
+];
+
+const routeOptions = [
+  { value: "uống", label: "Uống" },
+  { value: "tiêm", label: "Tiêm" },
+  { value: "bôi", label: "Bôi ngoài da" },
+  { value: "nhỏ", label: "Nhỏ (mắt, mũi, tai...)" },
+  { value: "xịt", label: "Xịt" },
+  { value: "đặt", label: "Đặt (âm đạo, trực tràng...)" },
+  { value: "khác", label: "Khác" },
+];
+
+const typeOptions = [
+  { value: "viên", label: "Viên" },
+  { value: "siro", label: "Siro" },
+  { value: "bột", label: "Bột" },
+  { value: "ống-tiêm", label: "Ống tiêm" },
+  { value: "kem", label: "Kem bôi" },
+  { value: "gel", label: "Gel" },
+  { value: "thuốc-nhỏ", label: "Thuốc nhỏ" },
+  { value: "viên-sủi", label: "Viên sủi" },
+  { value: "khác", label: "Khác" },
+];
+
+
+export { bloodGroups, genders, maritalStatuses, doctorSpecializations, visitReasons, Symptoms, Tests, dosagePatternOptions, routeOptions, typeOptions  };

@@ -51,5 +51,10 @@ public class DoctorServiceImpl implements com.example.profile.Service.DoctorServ
     public List<DoctorDropdown> getDoctorDropdowns() throws PrException{
         return doctorRepository.findAllDoctorDropdowns();
     }
+
+    @Override
+    public List<DoctorDropdown> getDoctorsById(List<Long> ids) throws PrException {
+        return doctorRepository.findAllDoctorDropdownsByIds(ids);
+    }
     
 }

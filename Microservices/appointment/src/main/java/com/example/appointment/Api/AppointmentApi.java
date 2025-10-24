@@ -1,15 +1,18 @@
 package com.example.appointment.Api;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.appointment.Dto.AppointmentDetails;
 import com.example.appointment.Dto.AppointmentDto;
 import com.example.appointment.Dto.AppointmentStatus;
 import com.example.appointment.Exception.ApException;
 import com.example.appointment.Service.AppointmentService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,13 +35,13 @@ public class AppointmentApi {
     }
 
     @GetMapping("/patient/{patientId}")
-    public List<AppointmentDto> getByPatient(@PathVariable Long patientId) throws ApException {
-        return service.getByPatient(patientId);
+    public ResponseEntity<List<AppointmentDetails>> getByPatient(@PathVariable Long patientId) throws ApException {
+        return new ResponseEntity<>(service.getAllAppointmentsByPatientId(patientId), HttpStatus.OK);
     }
 
     @GetMapping("/doctor/{doctorId}")
-    public List<AppointmentDto> getByDoctor(@PathVariable Long doctorId) throws ApException {
-        return service.getByDoctor(doctorId);
+    public ResponseEntity<List<AppointmentDetails>> getByDoctor(@PathVariable Long doctorId) throws ApException {
+        return new ResponseEntity<>(service.getAllAppointmentsByDoctorId(doctorId), HttpStatus.OK);
     }
 
     @PostMapping
@@ -52,8 +55,13 @@ public class AppointmentApi {
     }
 
     @PatchMapping("/{id}/status")
-    public AppointmentDto updateStatus(@PathVariable Long id, @RequestParam AppointmentStatus status) throws ApException {
-        return service.updateStatus(id, status);
+    public AppointmentDto updateStatus(
+            @PathVariable Long id,
+            @RequestParam AppointmentStatus status,
+            @RequestParam(required = false) String reason,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime newDateTime
+    ) throws ApException {
+        return service.updateStatus(id, status, reason, newDateTime);
     }
 
     @GetMapping("/details/{id}")
@@ -61,8 +69,11 @@ public class AppointmentApi {
         return new ResponseEntity<>(service.getAppointmentDetailsWithName(id), HttpStatus.OK);
     }
 
-    // @DeleteMapping("/{id}")
-    // public void delete(@PathVariable Long id) {
-    //     service.deleteAppointment(id);
-    // }
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<String> cancelAppointment(
+            @PathVariable Long id,
+            @RequestParam(required = false) String reason) {
+        service.cancelAppointment(id, reason);
+        return ResponseEntity.ok("Đã hủy cuộc hẹn ID: " + id + " - Lý do: " + reason);
+    }
 }

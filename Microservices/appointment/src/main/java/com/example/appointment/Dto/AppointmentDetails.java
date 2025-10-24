@@ -24,4 +24,10 @@ public class AppointmentDetails {
     private AppointmentStatus status;  // Trạng thái cuộc hẹn
 
     private String location;      // Tùy chọn: địa chỉ khám / phòng khám
+
+    private String statusReason;
+
+    private LocalDateTime completedAt;
+
+    private LocalDateTime cancelledAt;
 }

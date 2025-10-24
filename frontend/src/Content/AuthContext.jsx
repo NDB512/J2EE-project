@@ -270,6 +270,24 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const cancelAppointment = async (appointmentId, reason, accessToken) => {
+        try {
+            const res = await api.put(
+            `/appointment/${appointmentId}/cancel`,
+            null,
+            {
+                params: { reason },
+                headers: { Authorization: `Bearer ${accessToken}` },
+            }
+            );
+            successNotification(`Đã hủy lịch hẹn #${appointmentId}`);
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể hủy lịch hẹn!");
+            throw err;
+        }
+    };
+
     const getAppointmentsByDoctor = async (doctorId) => {
         try {
             const res = await api.get(`/appointment/doctor/${doctorId}`, {
@@ -295,10 +313,10 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const updateAppointmentStatus = async (id, status) => {
+    const updateAppointmentStatus = async (id, status, reason, newDateTime) => {
         try {
             const res = await api.patch(`/appointment/${id}/status`, null, {
-                params: { status }, // vì backend dùng @RequestParam
+                params: { status, reason, newDateTime },
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             successNotification("Cập nhật trạng thái lịch hẹn thành công!");
@@ -321,6 +339,56 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const createApRecord = async (ApReportDto) => {
+        try {
+            const res = await api.post("/appointment/report", ApReportDto, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Tạo hồ sơ khám thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Tạo hồ sơ khám thất bại!");
+            throw err;
+        }
+    }
+
+    const isRecordExists = async (appointmentId) => {
+        try {
+            const res = await api.get(`/appointment/report/isRecordExists/${appointmentId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Kiểm tra hồ sơ khám thất bại!");
+            throw err;
+        }
+    };
+
+    const getRecordsByPatientId = async (patientId) => {
+        try {
+            const res = await api.get(`/appointment/report/getRecordByPatientId/${patientId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Lấy hồ sơ khám thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Lấy hồ sơ khám thất bại!");
+            throw err;
+        }
+    };
+
+    const getPrescriptionsByPatientId = async (patientId) => {
+        try {
+            const res = await api.get(`/appointment/report/getPrescriptionsByPatientId/${patientId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            // successNotification("Lấy danh sách đơn thuốc thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Lấy danh sách đơn thuốc thất bại!");
+            throw err;
+        }
+    };
 
     return (
         <AuthContext.Provider
@@ -346,6 +414,11 @@ export const AuthProvider = ({ children }) => {
                 updateAppointment,
                 updateAppointmentStatus,
                 getAppointmentDetailsWithName,
+                cancelAppointment,
+                createApRecord,
+                isRecordExists,
+                getRecordsByPatientId,
+                getPrescriptionsByPatientId,
                 logout,
                 refresh,
             }}

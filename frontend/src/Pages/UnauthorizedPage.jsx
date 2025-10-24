@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@mantine/core";
 import { useAuth } from "../Content/AuthContext";
+import { successNotification } from "../Utils/Notification";
 
 const UnauthorizedPage = () => {
   const { logout } = useAuth();

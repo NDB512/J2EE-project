@@ -5,11 +5,7 @@ import java.time.LocalDateTime;
 import com.example.appointment.Dto.AppointmentDto;
 import com.example.appointment.Dto.AppointmentStatus;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Appointment {
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long patientId;       // ID bệnh nhân
@@ -33,7 +29,16 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;  // Trạng thái cuộc hẹn
 
-    private String location;      // Tùy chọn: địa chỉ khám / phòng khám
+    private String location;      // Địa điểm khám
+
+    @Column(name = "status_reason")
+    private String statusReason;  // Lý do hủy hoặc đổi lịch
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt; // Thời điểm hoàn thành
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt; // Thời điểm hủy
 
     public AppointmentDto toDto() {
         return new AppointmentDto(
@@ -44,7 +49,14 @@ public class Appointment {
             this.reason,
             this.notes,
             this.status,
-            this.location
+            this.location,
+            this.statusReason,
+            this.completedAt,
+            this.cancelledAt
         );
+    }
+
+    public Appointment(Long id){
+        this.id = id;
     }
 }

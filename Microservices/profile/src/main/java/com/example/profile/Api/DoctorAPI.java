@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.profile.Dto.DoctorDropdown;
@@ -49,4 +50,8 @@ public class DoctorAPI {
         return new ResponseEntity<>(DoctorService.getDoctorDropdowns(), HttpStatus.OK);
     }
 
+    @GetMapping("/getDoctorsById")
+    public ResponseEntity<List<DoctorDropdown>> getDoctorsById(@RequestParam List<Long> ids) throws PrException{
+        return new ResponseEntity<>(DoctorService.getDoctorsById(ids), HttpStatus.OK);
+    }
 }

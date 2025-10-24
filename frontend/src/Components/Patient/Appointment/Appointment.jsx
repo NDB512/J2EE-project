@@ -1,130 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Dropdown } from 'primereact/dropdown';
-import { InputNumber } from 'primereact/inputnumber';
-import { Button, Textarea, TextInput, Modal, LoadingOverlay } from '@mantine/core';
-import { ProgressBar } from 'primereact/progressbar';
-import { Calendar } from 'primereact/calendar';
-import { MultiSelect } from 'primereact/multiselect';
-import { Slider } from 'primereact/slider';
-import { Tag } from 'primereact/tag';
-import { IconPlus, IconSearch } from '@tabler/icons-react';
+import { Button, Textarea, TextInput, Modal, LoadingOverlay, Tooltip, Select } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { IconPlus, IconSearch, IconEdit, IconX } from '@tabler/icons-react';
 import { useAuth } from '../../../Content/AuthContext';
 import { DateTimePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import dayjs from 'dayjs';
 import { visitReasons } from "../../../Data/DropdownData";
+import { Tag } from 'primereact/tag';
+import { Toolbar } from 'primereact/toolbar';
+
+const cancelReasons = [
+    { value: "Bệnh nhân bận", label: "Bệnh nhân bận" },
+    { value: "Đổi lịch khám", label: "Đổi lịch khám" },
+    { value: "Nhầm lịch hẹn", label: "Nhầm lịch hẹn" },
+    { value: "Khác", label: "Khác" },
+];
 
 const Appointment = () => {
-    const [customers, setCustomers] = useState([]);
-    const [visible, { open: showOverlay, close: hideOverlay }] = useDisclosure(false);
+    const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [selectedCustomers, setSelectedCustomers] = useState([]);
-    const [opened, {open, close}] = useDisclosure(false);
-    const [filters, setFilters] = useState({
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        'country.name': { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] },
-        representative: { value: null, matchMode: FilterMatchMode.IN },
-        date: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] },
-        balance: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-        status: { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] },
-        activity: { value: null, matchMode: FilterMatchMode.BETWEEN }
-    });
+    const [opened, { open, close }] = useDisclosure(false);
+    const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
+    const [visible, { open: showOverlay, close: hideOverlay }] = useDisclosure(false);
     const [globalFilterValue, setGlobalFilterValue] = useState('');
-    const [representatives] = useState([
-        { name: 'Amy Elsner', image: 'amyelsner.png' },
-        { name: 'Anna Fali', image: 'annafali.png' },
-        { name: 'Asiya Javayant', image: 'asiyajavayant.png' },
-        { name: 'Bernardo Dominic', image: 'bernardodominic.png' },
-        { name: 'Elwin Sharvill', image: 'elwinsharvill.png' },
-        { name: 'Ioni Bowcher', image: 'ionibowcher.png' },
-        { name: 'Ivan Magalhaes', image: 'ivanmagalhaes.png' },
-        { name: 'Onyama Limba', image: 'onyamalimba.png' },
-        { name: 'Stephen Shaw', image: 'stephenshaw.png' },
-        { name: 'XuXue Feng', image: 'xuxuefeng.png' }
-    ]);
-    const [statuses] = useState(['unqualified', 'qualified', 'new', 'negotiation', 'renewal']);
-
-    const getSeverity = (status) => {
-        switch (status) {
-            case 'unqualified':
-                return 'danger';
-
-            case 'qualified':
-                return 'success';
-
-            case 'new':
-                return 'info';
-
-            case 'negotiation':
-                return 'warning';
-
-            case 'renewal':
-                return null;
-        }
-    };
-
     const [doctors, setDoctors] = useState([]);
-    const { getDoctorDropdown, user, createAppointment } = useAuth();
-    useEffect(() => {
-        // Dữ liệu mẫu
-        const mockData = [
-            {
-                id: 1,
-                name: 'John Doe',
-                country: { name: 'United States', code: 'us' },
-                representative: { name: 'Amy Elsner', image: 'amyelsner.png' },
-                date: new Date('2024-08-10'),
-                balance: 3200.5,
-                status: 'qualified',
-                activity: 75
-            },
-            {
-                id: 2,
-                name: 'Maria Anders',
-                country: { name: 'Germany', code: 'de' },
-                representative: { name: 'Bernardo Dominic', image: 'bernardodominic.png' },
-                date: new Date('2024-06-12'),
-                balance: 2500.2,
-                status: 'new',
-                activity: 55
-            },
-            {
-                id: 3,
-                name: 'Thomas Hardy',
-                country: { name: 'UK', code: 'gb' },
-                representative: { name: 'Ioni Bowcher', image: 'ionibowcher.png' },
-                date: new Date('2024-03-25'),
-                balance: 1800.0,
-                status: 'negotiation',
-                activity: 30
-            },
-            {
-                id: 4,
-                name: 'Ana Trujillo',
-                country: { name: 'Spain', code: 'es' },
-                representative: { name: 'Asiya Javayant', image: 'asiyajavayant.png' },
-                date: new Date('2024-10-03'),
-                balance: 4100.75,
-                status: 'renewal',
-                activity: 90
-            },
-            {
-                id: 5,
-                name: 'Michael Scott',
-                country: { name: 'Canada', code: 'ca' },
-                representative: { name: 'Stephen Shaw', image: 'stephenshaw.png' },
-                date: new Date('2024-09-15'),
-                balance: 5200.0,
-                status: 'unqualified',
-                activity: 20
-            }
-        ];
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    const [cancelConfirmOpened, setCancelConfirmOpened] = useState(false);
+    const [cancelId, setCancelId] = useState(null);
+    const [cancelReason, setCancelReason] = useState('');
+    const [customReason, setCustomReason] = useState('');
+    const [filterMode, setFilterMode] = useState('TODAY'); // TODAY | UPCOMING | FINISHED
 
+    const { 
+        getDoctorDropdown, 
+        getAppointmentsByPatient, 
+        user, 
+        createAppointment,
+        updateAppointment,
+        cancelAppointment
+    } = useAuth();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const data = await getAppointmentsByPatient(user?.profileId);
+                setAppointments(data);
+            } catch (err) {
+                console.error("Lỗi khi tải danh sách lịch hẹn:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
         const fetchDoctors = async () => {
             const data = await getDoctorDropdown();
@@ -133,136 +64,109 @@ const Appointment = () => {
                 value: d.id
             })));
         };
-        fetchDoctors();
 
-        setCustomers(mockData);
-    }, [getDoctorDropdown]);
+        if (user?.profileId) {
+            fetchData();
+            fetchDoctors();
+        }
+    }, [user]);
 
-
-    const getCustomers = (data) => {
-        return [...(data || [])].map((d) => {
-            d.date = new Date(d.date);
-
-            return d;
-        });
+    const reloadAppointments = async () => {
+        const data = await getAppointmentsByPatient(user?.profileId);
+        setAppointments(data);
     };
 
-    const formatDate = (value) => {
-        return value.toLocaleDateString('en-US', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+    const getStatusSeverity = (status) => {
+        switch (status) {
+            case 'PENDING': return 'warning';
+            case 'SCHEDULED': return 'info';
+            case 'RESCHEDULED': return 'help';
+            case 'CANCELLED': return 'danger';
+            case 'COMPLETED': return 'success';
+            case 'NO_SHOW': return 'secondary';
+            default: return null;
+        }
     };
 
-    const formatCurrency = (value) => {
-        return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'PENDING': return 'Chờ xác nhận';
+            case 'SCHEDULED': return 'Đã lên lịch';
+            case 'RESCHEDULED': return 'Đổi lịch';
+            case 'CANCELLED': return 'Đã hủy';
+            case 'COMPLETED': return 'Hoàn thành';
+            case 'NO_SHOW': return 'Không đến';
+            default: return 'Không xác định';
+        }
     };
 
-    const onGlobalFilterChange = (e) => {
-        const value = e.target.value;
-        let _filters = { ...filters };
+    const filteredAppointments = appointments.filter((appt) => {
+        const apptDate = dayjs(appt.appointmentDate);
+        const now = dayjs();
 
-        _filters['global'].value = value;
+        if (filterMode === 'TODAY') {
+            return apptDate.isSame(now, 'day');
+        }
+        if (filterMode === 'UPCOMING') {
+            return apptDate.isAfter(now, 'day') && appt.status !== 'COMPLETED' && appt.status !== 'CANCELLED';
+        }
+        if (filterMode === 'FINISHED') {
+            return appt.status === 'COMPLETED' || appt.status === 'CANCELLED';
+        }
+        return true;
+    });
 
-        setFilters(_filters);
-        setGlobalFilterValue(value);
-    };
+    const leftToolbarTemplate = () => (
+        <div className="flex gap-2">
+            <Button
+                leftSection={<IconPlus size={16} />}
+                onClick={open}
+                color="green"
+                variant="filled"
+            >
+                Đặt lịch
+            </Button>
+        </div>
+    );
 
-    const renderHeader = () => {
-        return (
-            <div className="flex flex-wrap gap-2 justify-between items-center">
-                <Button leftSection={<IconPlus/>} onClick={open} variant='filled'>Đặt lịch</Button>
-                <TextInput leftSection={<IconSearch />} fw={500} value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Keyword Search" />
-            </div>
-        );
-    };
+    const centerToolbarTemplate = () => (
+        <div className="flex gap-2 items-center">
+            <Button
+                color={filterMode === 'TODAY' ? 'green' : 'gray'}
+                variant={filterMode === 'TODAY' ? 'filled' : 'outline'}
+                onClick={() => setFilterMode('TODAY')}
+            >
+                Hôm nay
+            </Button>
 
-    const countryBodyTemplate = (rowData) => {
-        return (
-            <div className="flex align-items-center gap-2">
-                <img alt="flag" src="https://primefaces.org/cdn/primereact/images/flag/flag_placeholder.png" className={`flag flag-${rowData.country.code}`} style={{ width: '24px' }} />
-                <span>{rowData.country.name}</span>
-            </div>
-        );
-    };
+            <Button
+                color={filterMode === 'UPCOMING' ? 'blue' : 'gray'}
+                variant={filterMode === 'UPCOMING' ? 'filled' : 'outline'}
+                onClick={() => setFilterMode('UPCOMING')}
+            >
+                Sắp tới
+            </Button>
 
-    const representativeBodyTemplate = (rowData) => {
-        const representative = rowData.representative;
+            <Button
+                color={filterMode === 'FINISHED' ? 'red' : 'gray'}
+                variant={filterMode === 'FINISHED' ? 'filled' : 'outline'}
+                onClick={() => setFilterMode('FINISHED')}
+            >
+                Đã xong / Hủy
+            </Button>
+        </div>
+    );
 
-        return (
-            <div className="flex align-items-center gap-2">
-                <img alt={representative.name} src={`https://primefaces.org/cdn/primereact/images/avatar/${representative.image}`} width="32" />
-                <span>{representative.name}</span>
-            </div>
-        );
-    };
-
-    const representativeFilterTemplate = (options) => {
-        return (
-            <React.Fragment>
-                <div className="mb-3 font-bold">Agent Picker</div>
-                <MultiSelect value={options.value} options={representatives} itemTemplate={representativesItemTemplate} onChange={(e) => options.filterCallback(e.value)} optionLabel="name" placeholder="Any" className="p-column-filter" />
-            </React.Fragment>
-        );
-    };
-
-    const representativesItemTemplate = (option) => {
-        return (
-            <div className="flex align-items-center gap-2">
-                <img alt={option.name} src={`https://primefaces.org/cdn/primereact/images/avatar/${option.image}`} width="32" />
-                <span>{option.name}</span>
-            </div>
-        );
-    };
-
-    const dateBodyTemplate = (rowData) => {
-        return formatDate(rowData.date);
-    };
-
-    const dateFilterTemplate = (options) => {
-        return <Calendar value={options.value} onChange={(e) => options.filterCallback(e.value, options.index)} dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy" mask="99/99/9999" />;
-    };
-
-    const balanceBodyTemplate = (rowData) => {
-        return formatCurrency(rowData.balance);
-    };
-
-    const balanceFilterTemplate = (options) => {
-        return <InputNumber value={options.value} onChange={(e) => options.filterCallback(e.value, options.index)} mode="currency" currency="USD" locale="en-US" />;
-    };
-
-    const statusBodyTemplate = (rowData) => {
-        return <Tag value={rowData.status} severity={getSeverity(rowData.status)} />;
-    };
-
-    const statusFilterTemplate = (options) => {
-        return <Dropdown value={options.value} options={statuses} onChange={(e) => options.filterCallback(e.value, options.index)} itemTemplate={statusItemTemplate} placeholder="Select One" className="p-column-filter" showClear />;
-    };
-
-    const statusItemTemplate = (option) => {
-        return <Tag value={option} severity={getSeverity(option)} />;
-    };
-
-    const activityBodyTemplate = (rowData) => {
-        return <ProgressBar value={rowData.activity} showValue={false} style={{ height: '6px' }}></ProgressBar>;
-    };
-
-    const activityFilterTemplate = (options) => {
-        return (
-            <>
-                <Slider value={options.value} onChange={(e) => options.filterCallback(e.value)} range className="m-3"></Slider>
-                <div className="flex align-items-center justify-content-between px-2">
-                    <span>{options.value ? options.value[0] : 0}</span>
-                    <span>{options.value ? options.value[1] : 100}</span>
-                </div>
-            </>
-        );
-    };
-
-    const actionBodyTemplate = () => {
-        return <Button>haha</Button>;
-    };
+    const endToolbarTemplate = () => (
+        <div className="flex items-center">
+            <TextInput
+                leftSection={<IconSearch size={16} />}
+                value={globalFilterValue}
+                onChange={(e) => setGlobalFilterValue(e.target.value)}
+                placeholder="Tìm kiếm..."
+            />
+        </div>
+    );
 
     const form = useForm({
         initialValues: {
@@ -292,35 +196,140 @@ const Appointment = () => {
         };
 
             await createAppointment(dto);
-            form.reset();
             close();
+            form.reset();
+            await reloadAppointments();
         } finally {
             setLoading(false);
             hideOverlay();
         }
     };
 
-    const header = renderHeader();
+    const editForm = useForm({
+        initialValues: {
+            appointmentDate: null,
+            reason: '',
+            notes: '',
+        },
+    });
+
+    const handleEdit = (row) => {
+        setSelectedAppointment(row);
+        editForm.setValues({
+            appointmentDate: new Date(row.appointmentDate),
+            reason: row.reason,
+            notes: row.notes || '',
+        });
+        openEdit();
+    };
+
+    const handleUpdate = async (values) => {
+        try {
+            await updateAppointment(selectedAppointment.id, {
+                appointmentDate: dayjs(values.appointmentDate).format('YYYY-MM-DDTHH:mm:ss'),
+                reason: values.reason,
+                notes: values.notes,
+            });
+            closeEdit();
+            await reloadAppointments();
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const openCancelConfirm = (id) => {
+        setCancelId(id);
+        setCancelReason('');
+        setCustomReason('');
+        setCancelConfirmOpened(true);
+    };
+
+    const handleConfirmCancel = async () => {
+        const reason = cancelReason === 'Khác' ? customReason.trim() : cancelReason;
+        if (!reason) {
+            alert("Vui lòng chọn hoặc nhập lý do hủy lịch hẹn!");
+            return;
+        }
+        await cancelAppointment(cancelId, reason);
+        await reloadAppointments();
+        setCancelConfirmOpened(false);
+    };
+
+    const actionBody = (row) => {
+        const disabled = row.status === 'CANCELLED' || row.status === 'NO_SHOW';
+
+        return (
+            <div className="flex gap-2">
+                <Tooltip label={disabled ? "Không thể chỉnh sửa lịch hẹn đã hủy/không đến" : "Sửa lịch hẹn"}>
+                    <Button
+                        color="blue"
+                        size="xs"
+                        onClick={() => handleEdit(row)}
+                        leftSection={<IconEdit size={16} />}
+                        disabled={disabled}
+                    >
+                        Sửa
+                    </Button>
+                </Tooltip>
+
+                <Tooltip label={disabled ? "Lịch hẹn này đã bị hủy hoặc không đến" : "Hủy lịch hẹn"}>
+                    <Button
+                        color="red"
+                        size="xs"
+                        onClick={() => openCancelConfirm(row.id)}
+                        leftSection={<IconX size={16} />}
+                        disabled={disabled}
+                    >
+                        Hủy
+                    </Button>
+                </Tooltip>
+            </div>
+        );
+    };
+
+    const statusBody = (row) => (
+        <div>
+            <Tag value={getStatusLabel(row.status)} severity={getStatusSeverity(row.status)} />
+            {row.status === 'CANCELLED' && row.statusReason && (
+                <div className="text-xs text-gray-500 mt-1">
+                    <i>Lý do: {row.statusReason}</i>
+                </div>
+            )}
+        </div>
+    );
+
+    // const header = renderHeader();
 
     return (
         <div className="card">
-            <DataTable value={customers} paginator header={header} rows={10}
-                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    rowsPerPageOptions={[10, 25, 50]} dataKey="id" selectionMode="checkbox" selection={selectedCustomers} onSelectionChange={(e) => setSelectedCustomers(e.value)}
-                    filters={filters} filterDisplay="menu" globalFilterFields={['name', 'country.name', 'representative.name', 'balance', 'status']}
-                    emptyMessage="No customers found." currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
-                <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}></Column>
-                <Column field="name" header="Name" sortable filter filterPlaceholder="Search by name" style={{ minWidth: '14rem' }} />
-                <Column field="country.name" header="Country" sortable filterField="country.name" style={{ minWidth: '14rem' }} body={countryBodyTemplate} filter filterPlaceholder="Search by country" />
-                <Column header="Agent" sortable sortField="representative.name" filterField="representative" showFilterMatchModes={false} filterMenuStyle={{ width: '14rem' }}
-                    style={{ minWidth: '14rem' }} body={representativeBodyTemplate} filter filterElement={representativeFilterTemplate} />
-                <Column field="date" header="Date" sortable filterField="date" dataType="date" style={{ minWidth: '12rem' }} body={dateBodyTemplate} filter filterElement={dateFilterTemplate} />
-                <Column field="balance" header="Balance" sortable dataType="numeric" style={{ minWidth: '12rem' }} body={balanceBodyTemplate} filter filterElement={balanceFilterTemplate} />
-                <Column field="status" header="Status" sortable filterMenuStyle={{ width: '14rem' }} style={{ minWidth: '12rem' }} body={statusBodyTemplate} filter filterElement={statusFilterTemplate} />
-                <Column field="activity" header="Activity" sortable showFilterMatchModes={false} style={{ minWidth: '12rem' }} body={activityBodyTemplate} filter filterElement={activityFilterTemplate} />
-                <Column headerStyle={{ width: '5rem', textAlign: 'center' }} bodyStyle={{ textAlign: 'center', overflow: 'visible' }} body={actionBodyTemplate} />
+            <Toolbar
+                className="mb-4 bg-gray-50 border border-gray-200 rounded-md shadow-sm"
+                start={leftToolbarTemplate}
+                center={centerToolbarTemplate}
+                end={endToolbarTemplate}
+            />
+
+            {/* DataTable đã dùng danh sách lọc */}
+            <DataTable
+                value={filteredAppointments}
+                paginator
+                rows={10}
+                dataKey="id"
+                loading={loading}
+                emptyMessage="Không có lịch hẹn nào."
+                globalFilter={globalFilterValue}
+                className="shadow-md rounded-lg"
+            >
+                <Column field="doctorName" header="Bác sĩ" sortable />
+                <Column field="appointmentDate" header="Ngày hẹn" body={(r) => dayjs(r.appointmentDate).format('DD/MM/YYYY HH:mm')} sortable />
+                <Column field="reason" header="Lý do khám" sortable />
+                <Column field="location" header="Địa điểm" />
+                <Column header="Trạng thái" body={statusBody} sortable />
+                <Column field="notes" header="Ghi chú" />
+                <Column header="Hành động" body={actionBody} />
             </DataTable>
 
+            {/* Modal đặt lịch */}
             <Modal opened={opened} onClose={close} size="lg" title={<div className="text-xl font-semibold text-green-400">Đặt lịch</div>} centered>
 
             <LoadingOverlay
@@ -396,8 +405,54 @@ const Appointment = () => {
                     </button>
                 </form>
             </Modal>
+
+            {/* Modal chỉnh sửa */}
+            <Modal opened={editOpened} onClose={closeEdit} size="lg" title={<div className="text-xl font-semibold text-blue-400">Cập nhật lịch hẹn</div>} centered>
+                <form onSubmit={editForm.onSubmit(handleUpdate)} className="grid grid-cols-1 gap-5">
+                    <DateTimePicker label="Ngày & giờ khám" value={editForm.values.appointmentDate || new Date()} minDate={new Date()} onChange={(val) => editForm.setFieldValue('appointmentDate', val)} />
+                    <Dropdown value={editForm.values.reason} options={visitReasons.map(r => ({ label: r, value: r }))} onChange={(e) => editForm.setFieldValue('reason', e.value)} placeholder="Lý do khám" />
+                    <Textarea label="Ghi chú" {...editForm.getInputProps('notes')} />
+                    <Button type="submit" color="blue">Lưu thay đổi</Button>
+                </form>
+            </Modal>
+
+            {/* Modal xác nhận hủy */}
+            <Modal
+                opened={cancelConfirmOpened}
+                onClose={() => setCancelConfirmOpened(false)}
+                centered
+                title={<div className="text-lg font-semibold text-red-500">Xác nhận hủy lịch hẹn</div>}
+            >
+                <p className="mb-3">Vui lòng chọn hoặc nhập lý do hủy lịch hẹn:</p>
+                <Select
+                    data={cancelReasons}
+                    placeholder="Chọn lý do hủy"
+                    value={cancelReason}
+                    onChange={setCancelReason}
+                    clearable
+                    required
+                />
+                {cancelReason === 'Khác' && (
+                    <Textarea
+                        label="Lý do chi tiết"
+                        placeholder="Nhập lý do hủy..."
+                        value={customReason}
+                        onChange={(e) => setCustomReason(e.currentTarget.value)}
+                        required
+                        mt="sm"
+                    />
+                )}
+                <div className="flex justify-end mt-4 gap-3">
+                    <Button variant="default" onClick={() => setCancelConfirmOpened(false)}>
+                        Không
+                    </Button>
+                    <Button color="red" onClick={handleConfirmCancel}>
+                        Đồng ý hủy
+                    </Button>
+                </div>
+            </Modal>
         </div>
     );
-}
-        
+};
+
 export default Appointment;

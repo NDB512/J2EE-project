@@ -12,4 +12,5 @@ public interface DoctorService {
     public DoctorDto updateDoctor(Long id, DoctorDto doctor) throws PrException;
     public Boolean doctorExists(Long id);
     List<DoctorDropdown> getDoctorDropdowns() throws PrException;
+    List<DoctorDropdown> getDoctorsById(List<Long> ids) throws PrException;
 }
