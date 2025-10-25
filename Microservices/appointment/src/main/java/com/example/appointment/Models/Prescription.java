@@ -1,7 +1,6 @@
 package com.example.appointment.Models;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import com.example.appointment.Dto.PrescriptionDetails;
 import com.example.appointment.Dto.PrescriptionDto;

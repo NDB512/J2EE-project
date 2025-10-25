@@ -99,7 +99,7 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
       followUpDate: values.followUpDate,
     };
 
-    console.log('DTO gửi lên:', dto);
+    // console.log('DTO gửi lên:', dto);
 
     try {
       await createApRecord(dto);
