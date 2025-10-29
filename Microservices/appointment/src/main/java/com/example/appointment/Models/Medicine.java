@@ -39,6 +39,7 @@ public class Medicine {
         MedicineDto dto = new MedicineDto();
         dto.setId(id);
         dto.setName(name);
+        dto.setMedicineId(medicineId);
         dto.setDosage(dosage);
         dto.setFrequency(frequency);
         dto.setDuration(duration);

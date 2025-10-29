@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 @RequiredArgsConstructor
 public class MedicineInventoryServiceImpl implements MedicineInventoryService {
-
     
     private final MedicineInventoryRepository medicineInventoryRepository;
 
@@ -95,6 +94,56 @@ public class MedicineInventoryServiceImpl implements MedicineInventoryService {
         }
 
         this.markExpired(expiredMedicineInventories);
+    }
+
+    @Override
+    @Transactional  
+    public String sellStock(Long medicineId, Integer quantity) throws PyException {
+        List<MedicineInventory> inventories =
+            medicineInventoryRepository.findByMedicineIdAndExpiryDateAfterAndQuantityGreaterThanAndStockStatusOrderByExpiryDateAsc(
+                medicineId, LocalDate.now(), 0, StockStatus.ACTIVE
+            );
+
+        if (inventories.isEmpty()) {
+            throw new PyException("Không đủ tồn kho để bán!");
+        }
+
+        int remaining = quantity;
+        StringBuilder details = new StringBuilder();
+
+        for (MedicineInventory inv : inventories) {
+            if (remaining <= 0) break;
+
+            int available = inv.getQuantity();
+            int soldNow = Math.min(available, remaining);
+
+            inv.setQuantity(available - soldNow);
+            if (inv.getQuantity() == 0) {
+                inv.setStockStatus(StockStatus.SOLD_OUT);
+            }
+            medicineInventoryRepository.save(inv);
+
+            details.append("Batch No: ")
+                .append(inv.getBatchNo())
+                .append(", Quantity Sold: ")
+                .append(soldNow)
+                .append("\n");
+
+            if(inv.getQuantity() < 0){
+                throw new PyException("Lỗi trong quá trình bán hàng: tồn kho âm!");
+            }
+
+            // Cập nhật tồn kho tổng ở Medicine
+            medicineService.removeStock(medicineId, soldNow);
+
+            remaining -= soldNow;
+        }
+
+        if (remaining > 0) {
+            throw new PyException("Tồn kho không đủ để bán " + quantity + " sản phẩm!");
+        }
+
+        return details.toString();
     }
 
     // @Scheduled(cron = "0 14 19 * * ?")

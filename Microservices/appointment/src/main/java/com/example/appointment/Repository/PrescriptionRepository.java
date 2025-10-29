@@ -10,4 +10,5 @@ import com.example.appointment.Models.Prescription;
 public interface PrescriptionRepository extends CrudRepository<Prescription, Long> {
     Optional<Prescription> findByAppointment_Id(Long appointmentId);
     List<Prescription> findAllByPatientId(Long patientId);
+    List<Prescription> findBySoldFalse();
 }

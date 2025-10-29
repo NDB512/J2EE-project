@@ -10,6 +10,7 @@ public interface MedicineInventoryService {
     public MedicineInventoryDto getMedicineInventoryById(Long id) throws PyException;
     public MedicineInventoryDto addMedicineInventory(MedicineInventoryDto medicineInventoryDto) throws PyException;
     public MedicineInventoryDto updateMedicineInventory(MedicineInventoryDto medicineInventoryDto) throws PyException;
+    public String sellStock(Long medicineId, Integer quantity) throws PyException;
     public void deleteMedicineInventory(Long id);
     void deleteExpiredMedicines() throws PyException;
 }

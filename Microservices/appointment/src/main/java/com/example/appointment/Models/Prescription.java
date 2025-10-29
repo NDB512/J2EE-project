@@ -35,6 +35,8 @@ public class Prescription  {
     private LocalDate prescriptionDate; // Ngày kê đơn
     private String notes;               // Ghi chú thêm (ví dụ: "Tái khám sau 5 ngày")
 
+    private boolean sold = false;
+
     public PrescriptionDto toDto() {
         PrescriptionDto dto = new PrescriptionDto();
         dto.setId(id);
@@ -51,6 +53,6 @@ public class Prescription  {
     }
 
     public PrescriptionDetails toDetails(){
-        return new PrescriptionDetails(id, patientId, doctorId, null, appointment.getId(), prescriptionDate, notes, null);
+        return new PrescriptionDetails(id, patientId, doctorId, null, null, null, appointment.getId(), prescriptionDate, notes, null);
     }
 }

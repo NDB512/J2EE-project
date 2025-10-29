@@ -11,6 +11,7 @@ import com.example.appointment.Config.FeignInternalInterceptorConfig;
 import com.example.appointment.Dto.DoctorDto;
 import com.example.appointment.Dto.DoctorName;
 import com.example.appointment.Dto.PatientDto;
+import com.example.appointment.Dto.PatientName;
 
 @FeignClient(name = "profile", configuration = FeignInternalInterceptorConfig.class)
 public interface ProfileClient {
@@ -30,4 +31,6 @@ public interface ProfileClient {
     @GetMapping("/profile/doctor/getDoctorsById")
     List<DoctorName> getDoctorsById(@RequestParam List<Long> ids);
 
+    @GetMapping("/profile/patient/getPatientsById")
+    List<PatientName> getPatientsById(@RequestParam List<Long> ids);
 }

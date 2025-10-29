@@ -270,7 +270,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const cancelAppointment = async (appointmentId, reason, accessToken) => {
+    const cancelAppointment = async (appointmentId, reason) => {
         try {
             const res = await api.put(
             `/appointment/${appointmentId}/cancel`,
@@ -390,6 +390,237 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // Lấy tất cả thuốc
+    const getAllMedicines = async () => {
+        try {
+            const res = await api.get("/pharmacy/medicines", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Lấy danh sách thuốc thất bại!");
+            throw err;
+        }
+    };
+
+    // Lấy thông tin thuốc theo ID
+    const getMedicineById = async (id) => {
+        try {
+            const res = await api.get(`/pharmacy/medicines/${id}`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+                return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Không thể lấy thông tin thuốc!");
+            throw err;
+        }
+    };
+
+    // Thêm thuốc mới
+    const addMedicine = async (medicineDto) => {
+        try {
+                const res = await api.post("/pharmacy/medicines", medicineDto, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+                successNotification("Thêm thuốc mới thành công!");
+                return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Thêm thuốc thất bại!");
+            throw err;
+        }
+    };
+
+    // Cập nhật thuốc
+    const updateMedicine = async (medicineDto) => {
+        try {
+            await api.put(`/pharmacy/medicines`, medicineDto, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Cập nhật thuốc thành công!");
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Cập nhật thuốc thất bại!");
+            throw err;
+        }
+    };
+
+    // Xóa thuốc
+    const deleteMedicine = async (id) => {
+        try {
+            await api.delete(`/pharmacy/medicines/${id}`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Xóa thuốc thành công!");
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Xóa thuốc thất bại!");
+            throw err;
+        }
+    };
+
+    // Lấy toàn bộ tồn kho
+    const getAllMedicineInventories = async () => {
+    try {
+        const res = await api.get("/pharmacy/inventory", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        return res.data;
+    } catch (err) {
+        errorNotification("Không thể tải danh sách tồn kho!");
+        throw err;
+    }
+    };
+
+    // Lấy tồn kho theo ID
+    const getMedicineInventoryById = async (id) => {
+    try {
+        const res = await api.get(`/pharmacy/inventory/${id}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        return res.data;
+    } catch (err) {
+        errorNotification(err.response?.data?.message || "Không thể tải chi tiết tồn kho!");
+        throw err;
+    }
+    };
+
+    // Thêm tồn kho mới
+    const addMedicineInventory = async (data) => {
+    try {
+        const res = await api.post("/pharmacy/inventory", data, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        successNotification("Thêm tồn kho thành công!");
+        return res.data;
+    } catch (err) {
+        errorNotification(err.response?.data?.message || "Thêm tồn kho thất bại!");
+        throw err;
+    }
+    };
+
+    // Cập nhật tồn kho
+    const updateMedicineInventory = async (data) => {
+    try {
+        const res = await api.put("/pharmacy/inventory", data, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        successNotification("Cập nhật tồn kho thành công!");
+        return res.data;
+    } catch (err) {
+        errorNotification(err.response?.data?.message || "Cập nhật tồn kho thất bại!");
+        throw err;
+    }
+    };
+
+    // Xóa tồn kho
+    const deleteMedicineInventory = async (id) => {
+        try {
+            await api.delete(`/pharmacy/inventory/${id}`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Xóa tồn kho thành công!");
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Xóa tồn kho thất bại!");
+            throw err;
+        }
+    };
+
+    const createSale = async (saleData) => {
+        try {
+            const res = await api.post("/pharmacy/sales", saleData, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Tạo đơn bán hàng thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Tạo đơn bán hàng thất bại!");
+            throw err;
+        }
+    };
+
+    const updateSale = async (saleData) => {
+        try {
+            const res = await api.put("/pharmacy/sales", saleData, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Cập nhật đơn bán hàng thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification(err.response?.data?.message || "Cập nhật đơn bán hàng thất bại!");
+            throw err;
+        }
+    };
+
+    const getSaleItemsBySaleId = async (saleId) => {
+        try {
+            const res = await api.get(`/pharmacy/sales/getSaleItems/${saleId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải chi tiết đơn bán hàng!");
+            throw err;
+        }
+    };
+
+    const getSaleById = async (saleId) => {
+        try {
+            const res = await api.get(`/pharmacy/sales/get/${saleId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải chi tiết đơn bán hàng!");
+            throw err;
+        }
+    };
+
+    const getAllSales = async () => {
+        try {
+            const res = await api.get("/pharmacy/sales/getAll", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách đơn bán hàng!");
+            throw err;
+        }
+    };
+
+    const getMedicineDropdown = async () => {
+        try {
+            const res = await api.get("/pharmacy/medicines/dropdown", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách thuốc!");
+            throw err;
+        }
+    };
+
+    const getAllPrescriptions = async () => {
+        try {
+            const res = await api.get("/appointment/report/getAllPrescriptions", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách đơn thuốc!");
+            throw err;
+        }
+    };
+
+    const getMedicinesByPrescriptionId = async (prescriptionId) => {
+        try {
+            const res = await api.get(`/appointment/report/getMedicinesByPrescriptionId/${prescriptionId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách thuốc theo đơn thuốc!");
+            throw err;
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -419,6 +650,24 @@ export const AuthProvider = ({ children }) => {
                 isRecordExists,
                 getRecordsByPatientId,
                 getPrescriptionsByPatientId,
+                getAllMedicines,
+                getMedicineById,
+                addMedicine,
+                updateMedicine,
+                deleteMedicine,
+                getAllMedicineInventories,
+                getMedicineInventoryById,
+                addMedicineInventory,
+                updateMedicineInventory,
+                deleteMedicineInventory,
+                createSale,
+                updateSale,
+                getSaleItemsBySaleId,
+                getSaleById,
+                getAllSales,
+                getMedicineDropdown,
+                getAllPrescriptions,
+                getMedicinesByPrescriptionId,
                 logout,
                 refresh,
             }}

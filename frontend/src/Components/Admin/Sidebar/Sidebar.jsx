@@ -6,7 +6,10 @@ import {
     IconCalendarCheck,
     IconStethoscope,
     IconVaccine,
-    IconHeartbeat
+    IconHeartbeat,
+    IconPackage,
+    IconReceiptRefund,
+    IconReceipt
 } from "@tabler/icons-react";
 import { Avatar, Text } from "@mantine/core";
 import { NavLink } from "react-router-dom";
@@ -18,7 +21,9 @@ const adminLinks = [
     { name: 'Bác sĩ', href: '/admin/doctor', icon: <IconStethoscope /> },
     { name: 'Hồ sơ y tế', href: '/admin/patients', icon: <IconMoodHeart /> },
     { name: 'Cuộc hẹn', href: '/admin/appointments', icon: <IconCalendarCheck /> },
-    { name: 'Nhà thuốc', href: '/admin/pharmacy', icon: <IconVaccine /> },,
+    { name: 'Dược phẩm', href: '/admin/medicine', icon: <IconVaccine /> },
+    { name: 'Quản lý tồn kho', href: '/admin/inventory', icon: <IconPackage /> },
+    { name: 'Quản lý bán thuốc', href: '/admin/sale', icon: <IconReceipt /> },
 ];
 
 const Sidebar = ({ isOpen }) => {

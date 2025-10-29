@@ -8,10 +8,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.appointment.Dto.ApRecordDto;
+import com.example.appointment.Dto.MedicineDto;
 import com.example.appointment.Dto.PrescriptionDetails;
 import com.example.appointment.Dto.RecordDetail;
 import com.example.appointment.Exception.ApException;
 import com.example.appointment.Service.ApRecordService;
+import com.example.appointment.Service.MedicineService;
 import com.example.appointment.Service.PrescriptionService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,8 @@ public class ApRecordAPI {
     private final ApRecordService apRecordService;
 
     private final PrescriptionService prescriptionService;
+
+    private final MedicineService medicineService;
 
     /**
      * Tạo hồ sơ khám mới cho một cuộc hẹn
@@ -84,4 +88,21 @@ public class ApRecordAPI {
     public ResponseEntity<List<PrescriptionDetails>> getPrescriptionsByPatientId(@PathVariable Long patientId) throws ApException{
         return new ResponseEntity<>(prescriptionService.getPrescriptionsByPatientId(patientId), HttpStatus.OK);
     }
+
+    @GetMapping("/getAllPrescriptions")
+    public ResponseEntity<List<PrescriptionDetails>> getPrescriptions() throws ApException{
+        return new ResponseEntity<>(prescriptionService.getPrescriptions(), HttpStatus.OK);
+    }
+
+    @GetMapping("/getMedicinesByPrescriptionId/{prescriptionId}")
+    public ResponseEntity<List<MedicineDto>> getMedicinesByPrescriptionId(@PathVariable Long prescriptionId) throws ApException{
+        return new ResponseEntity<>(medicineService.getAllMedicinesByPrescriptionId(prescriptionId), HttpStatus.OK);
+    }
+
+    @PutMapping("/prescriptions/markSold/{id}")
+    public ResponseEntity<String> markPrescriptionSold(@PathVariable Long id) throws ApException {
+        prescriptionService.markAsSold(id);
+        return new ResponseEntity<>("Đã đánh dấu đơn thuốc là đã bán!", HttpStatus.OK);
+    }
+
 }

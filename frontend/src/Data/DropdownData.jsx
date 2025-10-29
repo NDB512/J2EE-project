@@ -197,16 +197,30 @@ const routeOptions = [
 ];
 
 const typeOptions = [
-  { value: "viên", label: "Viên" },
-  { value: "siro", label: "Siro" },
-  { value: "bột", label: "Bột" },
-  { value: "ống-tiêm", label: "Ống tiêm" },
-  { value: "kem", label: "Kem bôi" },
-  { value: "gel", label: "Gel" },
-  { value: "thuốc-nhỏ", label: "Thuốc nhỏ" },
-  { value: "viên-sủi", label: "Viên sủi" },
-  { value: "khác", label: "Khác" },
+  { value: "Viên", label: "Viên" },
+  { value: "Siro", label: "Siro" },
+  { value: "Bột", label: "Bột" },
+  { value: "Ống-tiêm", label: "Ống tiêm" },
+  { value: "Kem", label: "Kem bôi" },
+  { value: "Gel", label: "Gel" },
+  { value: "Thuốc-nhỏ", label: "Thuốc nhỏ" },
+  { value: "Viên-sủi", label: "Viên sủi" },
+  { value: "Khác", label: "Khác" },
 ];
 
+const categoryOptions = [
+  { value: "Giảm đau", label: "Giảm đau" },
+  { value: "Hạ sốt", label: "Hạ sốt" },
+  { value: "Kháng sinh", label: "Kháng sinh" },
+  { value: "Kháng virus", label: "Kháng virus" },
+  { value: "Kháng nấm", label: "Kháng nấm" },
+  { value: "Chống viêm", label: "Chống viêm" },
+  { value: "Chống dị ứng", label: "Chống dị ứng" },
+  { value: "Hạ huyết áp", label: "Hạ huyết áp" },
+  { value: "Hạ đường huyết", label: "Hạ đường huyết" },
+  { value: "Trung hòa axit dạ dày", label: "Trung hòa axit dạ dày" },
+  { value: "Vitamin / Khoáng chất", label: "Vitamin / Khoáng chất" },
+  { value: "Vaccine", label: "Vaccine" },
+];
 
-export { bloodGroups, genders, maritalStatuses, doctorSpecializations, visitReasons, Symptoms, Tests, dosagePatternOptions, routeOptions, typeOptions  };
+export { bloodGroups, genders, maritalStatuses, doctorSpecializations, visitReasons, Symptoms, Tests, dosagePatternOptions, routeOptions, typeOptions, categoryOptions  };

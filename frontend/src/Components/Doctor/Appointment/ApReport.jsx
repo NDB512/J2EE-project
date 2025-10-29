@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActionIcon, Button, Fieldset, MultiSelect, NumberInput, Select, TextInput, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
@@ -8,11 +8,23 @@ import { useAuth } from '../../../Content/AuthContext';
 import { errorNotification } from '../../../Utils/Notification';
 
 const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, status }) => {
-  const { createApRecord, isRecordExists } = useAuth();
+  const { createApRecord, isRecordExists, getMedicineDropdown } = useAuth();
 
   const [medicines, setMedicines] = useState([
-    { name: '', dosage: '', frequency: '', customFrequency: '', duration: '', route: '', type: '', instruction: '' },
+    { 
+      medicineId: null, 
+      isCustom: false,
+      name: '', 
+      dosage: '', 
+      frequency: '', 
+      customFrequency: '', 
+      duration: '', 
+      route: '', 
+      type: '', 
+      instruction: '' 
+    },
   ]);
+  const [availableMedicines, setAvailableMedicines] = useState([]);
 
   const form = useForm({
     initialValues: {
@@ -26,10 +38,35 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
     },
   });
 
+  // Load danh sách thuốc
+  const loadMedicines = async () => {
+    try {
+      const meds = await getMedicineDropdown();
+      setAvailableMedicines(meds || []);
+    } catch (err) {
+      errorNotification("Không thể tải danh sách thuốc!");
+    }
+  };
+
+  useEffect(() => {
+    loadMedicines();
+  }, []);
+
   const handleAddMedicine = () => {
     setMedicines([
       ...medicines,
-      { name: '', dosage: '', frequency: '', customFrequency: '', duration: '', route: '', type: '', instruction: '' },
+      { 
+        medicineId: null, 
+        isCustom: false,
+        name: '', 
+        dosage: '', 
+        frequency: '', 
+        customFrequency: '', 
+        duration: '', 
+        route: '', 
+        type: '', 
+        instruction: '' 
+      },
     ]);
   };
 
@@ -37,9 +74,77 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
     setMedicines(medicines.filter((_, i) => i !== index));
   };
 
-  const handleMedicineChange = (index, field, value) => {
+  // Helper để lấy options thuốc không trùng (dựa trên medicineId)
+  const getFilteredMedicineOptions = (currentIndex) => {
+    const selectedIds = medicines
+      .filter((_, i) => i !== currentIndex)
+      .map(m => m.medicineId)
+      .filter(id => id !== null);
+    
+    const filteredMeds = availableMedicines.filter(m => !selectedIds.includes(m.id));
+    
+    return [
+      { value: 'custom', label: 'Thuốc khác' },
+      ...filteredMeds.map(m => ({
+        value: m.id.toString(),
+        label: `${m.name} (${m.dosage})`,
+      })),
+    ];
+  };
+
+  // Xử lý thay đổi thuốc (Select)
+  const handleMedicineSelectChange = (index, value) => {
+    const updated = [...medicines];
+    if (value === 'custom') {
+      // Chuyển sang custom mode
+      updated[index] = {
+        ...updated[index],
+        medicineId: null,
+        isCustom: true,
+        name: '',
+        dosage: '',
+        type: '',
+      };
+    } else {
+      // Chọn thuốc predefined
+      const med = availableMedicines.find(m => m.id.toString() === value);
+      if (med) {
+        updated[index] = {
+          ...updated[index],
+          medicineId: med.id,
+          isCustom: false,
+          name: med.name,
+          dosage: med.dosage,
+          type: med.type,
+        };
+      }
+    }
+    setMedicines(updated);
+  };
+
+  // Xử lý thay đổi field chung (frequency, duration, route, instruction, customFrequency)
+  const handleCommonFieldChange = (index, field, value) => {
     const updated = [...medicines];
     updated[index][field] = value;
+    setMedicines(updated);
+  };
+
+  // Xử lý thay đổi name khi custom (kiểm tra trùng tên)
+  const handleCustomNameChange = (index, value) => {
+    const trimmedValue = value.trim();
+    if (trimmedValue) {
+      // Kiểm tra trùng với các thuốc khác (tên case-insensitive)
+      const isDuplicate = medicines.some((m, i) => 
+        i !== index && 
+        m.name.toLowerCase() === trimmedValue.toLowerCase()
+      );
+      if (isDuplicate) {
+        errorNotification('Tên thuốc này đã tồn tại! Vui lòng chọn thuốc khác.');
+        return;
+      }
+    }
+    const updated = [...medicines];
+    updated[index].name = value;
     setMedicines(updated);
   };
 
@@ -73,6 +178,19 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
       return; // lỗi đã được hiển thị trong isRecordExists
     }
 
+    // Validate medicines: ít nhất 1 thuốc hợp lệ
+    const validMedicines = medicines.filter(m => 
+      (m.medicineId || (m.isCustom && m.name.trim())) && 
+      m.dosage && 
+      m.duration && 
+      m.route && 
+      m.type
+    );
+    if (validMedicines.length === 0) {
+      errorNotification('Vui lòng thêm ít nhất một thuốc hợp lệ!');
+      return;
+    }
+
     const dto = {
       patientId,
       doctorId,
@@ -88,13 +206,28 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
         appointmentId,
         prescriptionDate: dayjs().format('YYYY-MM-DD'),
         notes: values.prescriptionNotes,
-        medicines: medicines.map((m) => ({
-          ...m,
-          frequency:
-            m.frequency === "Theo chỉ định bác sĩ"
-              ? (m.customFrequency?.trim() || "Theo chỉ định bác sĩ")
-              : m.frequency,
-        })),
+        medicines: validMedicines.map((m) => {
+          const medicineData = m.medicineId 
+            ? { 
+                medicineId: m.medicineId,
+                unitPrice: availableMedicines.find(med => med.id === m.medicineId)?.unitPrice || 0
+              } 
+            : { 
+                name: m.name,
+                type: m.type,
+                dosage: m.dosage
+              };
+          return {
+            ...medicineData,
+            frequency:
+              m.frequency === "Theo chỉ định bác sĩ"
+                ? (m.customFrequency?.trim() || "Theo chỉ định bác sĩ")
+                : m.frequency,
+            duration: Number(m.duration), // Đảm bảo là number
+            route: m.route,
+            instruction: m.instruction,
+          };
+        }),
       },
       followUpDate: values.followUpDate,
     };
@@ -172,20 +305,54 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
               </ActionIcon>
             </div>
 
-            <TextInput
+            {/* Select thuốc hoặc custom */}
+            <Select
               withAsterisk
               label="Tên thuốc"
-              placeholder="Nhập tên thuốc"
-              value={m.name}
-              onChange={(e) => handleMedicineChange(index, 'name', e.target.value)}
+              placeholder="Chọn thuốc hoặc 'Thuốc khác'"
+              data={getFilteredMedicineOptions(index)}
+              value={m.medicineId ? m.medicineId.toString() : (m.isCustom ? 'custom' : '')}
+              onChange={(val) => handleMedicineSelectChange(index, val)}
+              className="col-span-2"
             />
+            {m.isCustom && (
+              <TextInput
+                withAsterisk
+                label="Nhập Tên thuốc"
+                placeholder="Nhập tên thuốc"
+                value={m.name}
+                onChange={(e) => handleCustomNameChange(index, e.target.value)}
+                className="col-span-2"
+              />
+            )}
 
+            {/* Dosage: readOnly nếu predefined, editable nếu custom */}
             <TextInput
               withAsterisk
               label="Liều lượng"
               placeholder="VD: 500mg"
               value={m.dosage}
-              onChange={(e) => handleMedicineChange(index, 'dosage', e.target.value)}
+              readOnly={!m.isCustom}
+              onChange={(e) => {
+                if (m.isCustom) {
+                  const updated = [...medicines];
+                  updated[index].dosage = e.target.value;
+                  setMedicines(updated);
+                }
+              }}
+            />
+
+            {/* Type: readOnly nếu predefined, editable nếu custom */}
+            <Select
+              withAsterisk
+              label="Dạng thuốc"
+              placeholder="Chọn dạng thuốc"
+              data={typeOptions}
+              value={m.type}
+              onChange={(val) => {
+                if (!m.isCustom) return;
+                handleCommonFieldChange(index, 'type', val);
+              }}
             />
 
             <Select
@@ -194,7 +361,7 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
               placeholder="Chọn liều dùng"
               data={dosagePatternOptions}
               value={m.frequency}
-              onChange={(val) => handleMedicineChange(index, 'frequency', val)}
+              onChange={(val) => handleCommonFieldChange(index, 'frequency', val)}
             />
 
             {m.frequency === "Theo chỉ định bác sĩ" && (
@@ -202,7 +369,8 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
                 label="Nhập liều dùng tùy chỉnh"
                 placeholder="VD: 1 viên sáng, 2 viên tối, cách ngày 1 lần..."
                 value={m.customFrequency}
-                onChange={(e) => handleMedicineChange(index, 'customFrequency', e.target.value)}
+                onChange={(e) => handleCommonFieldChange(index, 'customFrequency', e.target.value)}
+                className="col-span-2"
               />
             )}
 
@@ -210,26 +378,18 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
               withAsterisk
               label="Số ngày dùng"
               placeholder="Nhập số ngày"
-              value={m.duration}
-              onChange={(val) => handleMedicineChange(index, 'duration', val)}
+              value={Number(m.duration) || ''}
+              onChange={(val) => handleCommonFieldChange(index, 'duration', val)}
             />
 
             <Select
               withAsterisk
               label="Cách dùng"
               placeholder="Chọn cách dùng"
+              className="col-span-2"
               data={routeOptions}
               value={m.route}
-              onChange={(val) => handleMedicineChange(index, 'route', val)}
-            />
-
-            <Select
-              withAsterisk
-              label="Dạng thuốc"
-              placeholder="Chọn dạng thuốc"
-              data={typeOptions}
-              value={m.type}
-              onChange={(val) => handleMedicineChange(index, 'type', val)}
+              onChange={(val) => handleCommonFieldChange(index, 'route', val)}
             />
 
             <Textarea
@@ -239,7 +399,7 @@ const ApReport = ({ id: appointmentId, doctorId, patientId, appointmentDate, sta
               className="col-span-2"
               minRows={2}
               value={m.instruction}
-              onChange={(e) => handleMedicineChange(index, 'instruction', e.target.value)}
+              onChange={(e) => handleCommonFieldChange(index, 'instruction', e.target.value)}
             />
           </div>
         ))}

@@ -27,6 +27,7 @@
             Medicine entity = new Medicine();
             entity.setId(this.id);
             entity.setName(this.name);
+            entity.setMedicineId(this.medicineId);
             entity.setDosage(this.dosage);
             entity.setFrequency(this.frequency);
             entity.setDuration(this.duration);

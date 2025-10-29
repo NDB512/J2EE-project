@@ -3,8 +3,6 @@ package com.example.pharmacy.Dto;
 import java.time.LocalDateTime;
 
 import com.example.pharmacy.Model.Medicine;
-import com.example.pharmacy.Model.MedicineCategory;
-import com.example.pharmacy.Model.MedicineType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,8 +15,8 @@ public class MedicineDto {
     private Long id;
     private String name;
     private String dosage;
-    private MedicineCategory category;
-    private MedicineType type;
+    private String category;
+    private String type;
     private String manufacturer;
     private Integer unitPrice;
     private LocalDateTime createdAt;
@@ -37,5 +35,4 @@ public class MedicineDto {
         medicine.setStock(stock);
         return medicine;
     }
-    
 }

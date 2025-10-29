@@ -1,5 +1,5 @@
 package com.example.pharmacy.Dto;
 
 public enum StockStatus {
-    ACTIVE, EXPIRIED
+    ACTIVE, EXPIRIED, SOLD_OUT
 }

@@ -102,6 +102,16 @@
             "projectName": "pharmacy",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MediaApplication<media>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.media.MediaApplication",
+            "projectName": "media",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

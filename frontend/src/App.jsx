@@ -5,6 +5,7 @@ import { createTheme, MantineProvider } from '@mantine/core'
 import AppRouter from './Routers/AppRouter'
 import { Notifications } from '@mantine/notifications'
 import '@mantine/notifications/styles.css'
+import '@mantine/spotlight/styles.css'
 import { PrimeReactProvider } from 'primereact/api';
 
 

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.pharmacy.Dto.SaleDto;
 import com.example.pharmacy.Dto.SaleItemDto;
+import com.example.pharmacy.Dto.SaleRequest;
 import com.example.pharmacy.Exception.PyException;
 import com.example.pharmacy.Service.SaleItemService;
 import com.example.pharmacy.Service.SaleService;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/pharmacy/sales")
 @RequiredArgsConstructor
 public class SaleApi {
+    
     private final SaleService saleService;
     private final SaleItemService saleItemService;
 
@@ -32,7 +34,7 @@ public class SaleApi {
         return new ResponseEntity<>(saleService.createSale(saleDto), HttpStatus.CREATED);
     }
 
-    @PutMapping("/update")
+    @PutMapping
     public ResponseEntity<String> updateSale(@RequestBody SaleDto saleDto) throws PyException{
         saleService.updateSale(saleDto);
         return new ResponseEntity<>("Cập nhập thành công hóa đơn!", HttpStatus.OK);
@@ -46,5 +48,10 @@ public class SaleApi {
     @GetMapping("/get/{id}")
     public ResponseEntity<SaleDto> getSale(@PathVariable Long id) throws PyException{
         return new ResponseEntity<>(saleService.getSale(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<List<SaleRequest>> getAllSales() throws PyException{
+        return new ResponseEntity<>(saleService.getAllSales(), HttpStatus.OK);
     }
 }

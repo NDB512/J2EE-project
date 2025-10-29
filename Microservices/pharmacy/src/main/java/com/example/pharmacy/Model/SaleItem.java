@@ -27,7 +27,7 @@ public class SaleItem {
     private Sale sale;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sale_id", nullable = false)
+    @JoinColumn(name = "medicine_id", nullable = false)
     private Medicine medicine;
 
     private String batchNo; //Số lô sản xuất

@@ -1,8 +1,11 @@
 package com.example.profile.Service.Impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.profile.Dto.PatientDropdown;
 import com.example.profile.Dto.PatientDto;
 import com.example.profile.Exception.PrException;
 import com.example.profile.Repository.PatientRepository;
@@ -45,5 +48,10 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public Boolean patientExists(Long id) {
         return patientRepository.existsById(id);
+    }
+
+    @Override
+    public List<PatientDropdown> getPatientsById(List<Long> ids) throws PrException {
+        return patientRepository.findAllPatientDropdownByIds(ids);
     }
 }

@@ -58,10 +58,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 case Doctor -> profileId = profileClient.addDoctor(userDto);
                 case Pharmacy -> profileId = profileClient.addPharmacy(userDto);
                 case Patient -> profileId = profileClient.addPatient(userDto);
+                case Admin -> profileId = null;
                 default -> throw new BeException("Invalid role");
             }
 
-            if (profileId == null || profileId == -1L) {
+            if (userDto.getRole() != Roles.Admin && (profileId == null || profileId == -1L)) {
                 throw new BeException("Failed to create profile");
             }
 

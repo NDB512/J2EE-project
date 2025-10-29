@@ -1,11 +1,14 @@
 package com.example.pharmacy.Service.Impl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.pharmacy.Dto.MedicineDropdownDto;
 import com.example.pharmacy.Dto.MedicineDto;
+import com.example.pharmacy.Dto.MedicineListDto;
 import com.example.pharmacy.Exception.PyException;
 import com.example.pharmacy.Model.Medicine;
 import com.example.pharmacy.Repository.MedicineRepository;
@@ -69,8 +72,14 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
-    public List<MedicineDto> getAllMedicines() throws PyException {
-        return ((List<Medicine>) medicineRepository.findAll()).stream().map(Medicine::toDto).toList();
+    public List<MedicineListDto> getAllMedicines() throws PyException {
+        return java.util.stream.StreamSupport.stream(medicineRepository.findAll().spliterator(), false)
+                .map(m -> new MedicineListDto(
+                        m.getId(),
+                        m.getName(),
+                        m.getUnitPrice()
+                ))
+                .toList();
     }
 
     @Override
@@ -116,6 +125,20 @@ public class MedicineServiceImpl implements MedicineService {
         medicineRepository.save(medicine);
 
         return medicine.getStock();
+    }
+
+    @Override
+    public List<MedicineDropdownDto> getDropdownList() {
+        return ((List<Medicine>) medicineRepository.findAll())
+                .stream()
+                .map(m -> new MedicineDropdownDto(
+                        m.getId(),
+                        m.getName(),
+                        m.getType().toString(),
+                        m.getUnitPrice(),
+                        m.getDosage()
+                ))
+                .toList();
     }
     
 }

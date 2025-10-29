@@ -23,6 +23,13 @@ public class SaleItemServiceImpl implements SaleItemService {
         return saleItemRepository.save(saleItemDto.toEntity()).getId();
     }
 
+    @Override
+    public void createSaveItems(Long saveId, List<SaleItemDto> saleItemDtos) throws PyException{
+        saleItemDtos.stream().map((x) -> {
+            x.setSaleId(saveId);
+            return x.toEntity();
+        }).forEach(saleItemRepository::save);
+    }
 
     @Override
     public void createMultipleSaleItem(Long saleId, Long medicineId, List<SaleItemDto> saleItemDtos)

@@ -11,4 +11,5 @@ public interface SaleItemService {
     void updateSaleItem(SaleItemDto saleItemDto) throws PyException;
     List<SaleItemDto> getSaleItemsBySaleId(Long saleId) throws PyException;
     SaleItemDto getSaleItem(Long id) throws PyException;
+    public void createSaveItems(Long saveId, List<SaleItemDto> saleItemDtos) throws PyException;
 }

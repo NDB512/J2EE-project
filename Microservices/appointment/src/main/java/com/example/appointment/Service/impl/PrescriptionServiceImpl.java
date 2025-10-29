@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.appointment.Clients.ProfileClient;
 import com.example.appointment.Dto.DoctorName;
+import com.example.appointment.Dto.PatientName;
 import com.example.appointment.Dto.PrescriptionDetails;
 import com.example.appointment.Dto.PrescriptionDto;
 import com.example.appointment.Exception.ApException;
@@ -82,5 +83,47 @@ public class PrescriptionServiceImpl implements PrescriptionService{
         });
 
         return prescriptionDetails;
+    }
+
+    @Override
+    public List<PrescriptionDetails> getPrescriptions() throws ApException {
+        List<Prescription> prescriptions = (List<Prescription>)prescriptionRepository.findBySoldFalse();
+        List<PrescriptionDetails> prescriptionDetails = prescriptions.stream().map(Prescription::toDetails).toList();
+        
+        List<Long> doctorIds = prescriptionDetails.stream().map(PrescriptionDetails::getDoctorId).distinct().toList();
+        List<Long> patientIds = prescriptionDetails.stream().map(PrescriptionDetails::getPatientId).distinct().toList();
+
+        List<DoctorName> doctorNames = profileClient.getDoctorsById(doctorIds);
+        List<PatientName> patientNames = profileClient.getPatientsById(patientIds);
+
+        Map<Long, String> doctorMap = doctorNames.stream().collect(Collectors.toMap(DoctorName::getId, DoctorName::getName));
+        Map<Long, PatientName> patientMap = patientNames.stream()
+        .collect(Collectors.toMap(PatientName::getId, p -> p));
+
+
+        prescriptionDetails.forEach(details -> {
+            details.setDoctorName(
+                doctorMap.getOrDefault(details.getDoctorId(), "Không tìm thấy tên bác sĩ")
+            );
+
+            PatientName patient = patientMap.get(details.getPatientId());
+            if (patient != null) {
+                details.setPatientName(patient.getName());
+                details.setPatientPhone(patient.getPhone());
+            } else {
+                details.setPatientName("Không tìm thấy tên bệnh nhân");
+                details.setPatientPhone("Không tìm thấy số điện thoại bệnh nhân");
+            }
+        });
+
+        return prescriptionDetails;
+    }
+
+    @Override
+    public void markAsSold(Long id) throws ApException {
+        Prescription prescription = prescriptionRepository.findById(id)
+            .orElseThrow(() -> new ApException("Không tìm thấy đơn thuốc!"));
+        prescription.setSold(true);
+        prescriptionRepository.save(prescription);
     }
 }

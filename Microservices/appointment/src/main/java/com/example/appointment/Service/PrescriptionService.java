@@ -11,4 +11,6 @@ public interface PrescriptionService {
     public PrescriptionDto getPrescriptionByAppointmentId(Long appointmentId) throws ApException;
     public PrescriptionDto getPrescriptionById(Long prescriptionId);
     public List<PrescriptionDetails> getPrescriptionsByPatientId(Long patientId) throws ApException;
+    public List<PrescriptionDetails> getPrescriptions() throws ApException;
+    public void markAsSold(Long id);
 }

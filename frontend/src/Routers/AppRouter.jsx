@@ -16,6 +16,9 @@ import PharmacyProfilePage from "../Pages/Pharmacy/PharmacyProfilePage";
 import PatientAppointmentPage from "../Pages/Patient/PatientAppointmentPage";
 import DoctorAppointmentPage from "../Pages/Doctor/PatientAppointmentPage";
 import DoctorAppointmentDetailPage from "../Pages/Doctor/DoctorAppointmentDetailPage";
+import AdminMedicinePage from "../Pages/Admin/AdminMedicinePage";
+import AdminInventoryPage from "../Pages/Admin/AdminInventoryPage";
+import AdminSalePage from "../Pages/Admin/AdminSalePage";
 
 const AppRouter = () => {
   return (
@@ -27,7 +30,9 @@ const AppRouter = () => {
                 <Route path="doctor" element={<Random />} />
                 <Route path="patients" element={<Random />} />
                 <Route path="appointments" element={<Random />} />
-                <Route path="pharmacy" element={<Random />} />
+                <Route path="medicine" element={<AdminMedicinePage />} />
+                <Route path="inventory" element={<AdminInventoryPage />} />
+                <Route path="sale" element={<AdminSalePage />} />
             </Route>
 
             <Route path="/patient" element={<ProtectedRoute allowedRoles={["Patient"]}> <PatientDashboard /> </ProtectedRoute>}>
@@ -50,7 +55,7 @@ const AppRouter = () => {
             <Route path="/pharmacy" element={<ProtectedRoute allowedRoles={["Pharmacy"]}> <PharmacyDashboard /> </ProtectedRoute>}>
                 <Route path="dashboard" element={<Random />} />
                 <Route path="profile" element={<PharmacyProfilePage />} />
-                <Route path="prescriptions" element={<Random />} />
+                <Route path="medicine" element={<Random />} />
                 <Route path="inventory" element={<Random />} />
             </Route>
 

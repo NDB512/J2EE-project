@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import com.example.pharmacy.Dto.MedicineDto;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,11 +24,9 @@ public class Medicine {
 
     private String name;
     private String dosage; // Liều lượng (ví dụ: 500mg)
-    @Enumerated(EnumType.STRING)
-    private MedicineCategory category;
+    private String category;
     
-    @Enumerated(EnumType.STRING)
-    private MedicineType type;
+    private String type;
 
     private String manufacturer; //Nhà sản xuất
     private Integer unitPrice;

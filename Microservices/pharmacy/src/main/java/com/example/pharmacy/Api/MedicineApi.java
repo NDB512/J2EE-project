@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.pharmacy.Dto.MedicineDropdownDto;
 import com.example.pharmacy.Dto.MedicineDto;
+import com.example.pharmacy.Dto.MedicineListDto;
 import com.example.pharmacy.Exception.PyException;
 import com.example.pharmacy.Service.MedicineService;
 
@@ -28,7 +30,7 @@ public class MedicineApi {
 
     // Lấy danh sách tất cả thuốc
     @GetMapping
-    public ResponseEntity<List<MedicineDto>> getAllMedicines() throws PyException {
+    public ResponseEntity<List<MedicineListDto>> getAllMedicines() throws PyException {
         return new ResponseEntity<>(medicineService.getAllMedicines(), HttpStatus.OK);
     }
 
@@ -46,7 +48,7 @@ public class MedicineApi {
 
     // Cập nhật thông tin thuốc
     @PutMapping
-    public ResponseEntity<String> updateMedicine(@PathVariable Long id, @RequestBody MedicineDto medicineDto) throws PyException {
+    public ResponseEntity<String> updateMedicine(@RequestBody MedicineDto medicineDto) throws PyException {
         // // đảm bảo DTO có id khớp với path variable
         // medicineDto.setId(id);
         medicineService.updateMedicine(medicineDto);
@@ -58,5 +60,10 @@ public class MedicineApi {
     public ResponseEntity<String> deleteMedicine(@PathVariable Long id) throws PyException {
         medicineService.deleteMedicine(id);
         return ResponseEntity.ok("Xóa thuốc thành công!");
+    }
+
+    @GetMapping("/dropdown")
+    public ResponseEntity<List<MedicineDropdownDto>> getMedicineDropdown() {
+        return ResponseEntity.ok(medicineService.getDropdownList());
     }
 }
