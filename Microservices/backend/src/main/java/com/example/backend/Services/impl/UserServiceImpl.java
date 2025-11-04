@@ -1,5 +1,6 @@
 package com.example.backend.Services.impl;
 
+import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.backend.Dto.AuthResponse;
+import com.example.backend.Dto.MonthRoleCountDto;
+import com.example.backend.Dto.RegistrationCountDto;
 import com.example.backend.Dto.Roles;
 import com.example.backend.Dto.UserDto;
 import com.example.backend.Exception.BeException;
@@ -109,38 +112,47 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new BeException("Invalid user info from Google");
         }
 
+        // Chuẩn bị DTO cho tạo profile
         UserDto userDto = new UserDto();
+        userDto.setEmail(email);
+        userDto.setName(name);
+        userDto.setRole(Roles.Patient);
 
+        // Kiểm tra user có trong DB chưa
         User user = userRepository.findByEmail(email)
                 .map(u -> {
-                    u.setName(name);
+                    // Nếu user có nhưng chưa cập nhật tên mới từ Google
+                    if (!name.equals(u.getName())) {
+                        u.setName(name);
+                    }
                     return userRepository.save(u);
                 })
                 .orElseGet(() -> {
+                    // Nếu chưa có → tạo mới user
                     User newUser = new User();
                     newUser.setName(name);
                     newUser.setEmail(email);
-                    newUser.setPassword("{noop}dummy-google-pass"); // Dummy cho consistency
-                    newUser.setRole(Roles.Patient); // Default role
+                    newUser.setPassword("{noop}dummy-google-pass"); // dummy cho user Google
+                    newUser.setRole(Roles.Patient);
                     newUser.setProvider(User.AuthProvider.GOOGLE);
-                    userDto.setEmail(email);
-                    userDto.setName(name);
-                    userDto.setRole(Roles.Patient);
                     return userRepository.save(newUser);
                 });
 
-        Long profileId;
-        try {
-            profileId = profileClient.addDoctor(userDto);  // Null token cho register
-            if (profileId == null || profileId == -1L) {
-                throw new BeException("Failed to create profile");
+        // Nếu user chưa có profile thì tạo profile Patient
+        if (user.getProfileId() == null || user.getProfileId() <= 0) {
+            try {
+                Long profileId = profileClient.addPatient(userDto);
+                if (profileId == null || profileId == -1L) {
+                    throw new BeException("Tạo profile thất bại");
+                }
+                user.setProfileId(profileId);
+                userRepository.save(user);
+            } catch (Exception e) {
+                throw new BeException("Tạo profile thất bại: " + e.getMessage());
             }
-        } catch (Exception e) {
-            throw new BeException("Profile creation failed: " + e.getMessage());
         }
 
-        userDto.setProfileId(profileId);
-
+        // Tạo JWT token cho user
         UserDetails userDetails = loadUserByUsername(user.getEmail());
         String accessToken = jwtUtil.generateAccessToken(userDetails);
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
@@ -159,16 +171,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             user.getEmail(), 
             user.getPassword() != null ? user.getPassword() : "{noop}dummy", 
             user.getRole(),
-            user.getProfileId()
+            user.getProfileId(),
+            user.getProfileImageUrlId()
         );
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserDto getUserById(Long id) {
+        if (id == null) {
+            throw new BeException("User id is required");
+        }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BeException("User not found"));
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), user.getProfileId(), user.getLicenseNumber());
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), user.getProfileId(), user.getLicenseNumber(), user.getProfileImageUrlId(), user.getCreatedAt(), user.getUpdatedAt());
     }
 
     @Override
@@ -191,7 +207,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (userDto.getRole() != null) user.setRole(userDto.getRole());
         
         userRepository.save(user);
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), null, user.getLicenseNumber());
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), null, user.getLicenseNumber(), user.getProfileImageUrlId(), user.getCreatedAt(), user.getUpdatedAt());
     }
 
     @Override
@@ -199,6 +215,22 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDto getUserByEmail(String email) throws BeException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BeException("User not found"));
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), user.getProfileId(), user.getLicenseNumber());
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), null, user.getRole(), user.getProfileId(), user.getLicenseNumber(), user.getProfileImageUrlId(), user.getCreatedAt(), user.getUpdatedAt());
+    }
+
+    @Override
+    public void saveImageId(Long id, Long profileImageUrlId) throws BeException {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new BeException("User with ID " + id + " not found."));
+        user.setProfileImageUrlId(profileImageUrlId);
+        userRepository.save(user);
+    }
+
+    @Override
+    public RegistrationCountDto getMonthlyRegistrations() throws BeException {
+        List<MonthRoleCountDto> doctorCounts = userRepository.countRegistrationsByRoleGroupedByMonth(Roles.Doctor);
+        List<MonthRoleCountDto> patientCounts = userRepository.countRegistrationsByRoleGroupedByMonth(Roles.Patient);
+
+        return new RegistrationCountDto(doctorCounts, patientCounts);
     }
 }

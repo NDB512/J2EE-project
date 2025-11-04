@@ -1,0 +1,42 @@
+.wrapper {
+  position: relative;
+  margin-bottom: 50px;
+}
+
+.dropzone {
+  border-width: 2px;
+  border-style: dashed;
+  border-radius: 16px;
+  padding: 60px 20px; /* tăng padding để khung to hơn */
+  color: var(--mantine-color-bright);
+  width: 100%;
+  max-width: 700px; /* tăng chiều ngang */
+  min-height: 250px; /* tăng chiều cao */
+  margin: 0 auto; /* căn giữa */
+  transition: background-color 0.2s ease;
+}
+
+.dropzone:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.icon {
+  color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-white));
+}
+
+.control {
+  position: absolute;
+  width: 250px;
+  left: calc(50% - 125px);
+  bottom: -20px;
+}
+
+.description {
+  text-align: center;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-dimmed);
+  margin-top: var(--mantine-spacing-xs);
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}

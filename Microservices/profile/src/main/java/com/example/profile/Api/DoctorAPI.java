@@ -54,4 +54,9 @@ public class DoctorAPI {
     public ResponseEntity<List<DoctorDropdown>> getDoctorsById(@RequestParam List<Long> ids) throws PrException{
         return new ResponseEntity<>(DoctorService.getDoctorsById(ids), HttpStatus.OK);
     }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<List<DoctorDto>> getAllDoctors() throws PrException {
+        return new ResponseEntity<>(DoctorService.getAllDoctors(), HttpStatus.OK);
+    }
 }

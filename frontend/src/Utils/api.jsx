@@ -21,15 +21,15 @@ api.interceptors.response.use(
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
                 try {
-                const res = await axios.post('http://localhost:9000/user/refresh', { refreshToken });
-                const data = res.data;
-                localStorage.setItem('accessToken', data.accessToken);
-                localStorage.setItem('refreshToken', data.refreshToken);
-                originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-                return api(originalRequest);
+                    const res = await axios.post('http://localhost:9000/user/refresh', { refreshToken });
+                    const data = res.data;
+                    localStorage.setItem('accessToken', data.accessToken);
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                    originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+                    return api(originalRequest);
                 } catch {
-                localStorage.clear();
-                window.location.href = '/login';
+                    localStorage.clear();
+                    window.location.href = '/login';
                 }
             }
         }

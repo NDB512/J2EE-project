@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
                     email: decoded?.email,
                     role: decoded?.role,
                     profileId: decoded?.profileId,
+                    profileImageUrlId: decoded?.profileImageUrlId,
                 };
 
                 dispatch(setAuth({ ...data, user: userData }));
@@ -52,18 +53,12 @@ export const AuthProvider = ({ children }) => {
     };
 
     // Login qua Google
-    const googleLogin = (accessToken, refreshToken, user) => { // Giữ param user cho tương thích, nhưng ưu tiên decode nếu cần
+    const googleLogin = async (accessToken, refreshToken, user) => {
         const decoded = decodeToken(accessToken);
-        const userData = user || {
-            id: decoded?.id,
-            name: decoded?.name,
-            email: decoded?.email,
-            role: decoded?.role,
-            profileId: decoded?.profileId,
-        };
-
+        const userData = user || { ...decoded };
         dispatch(setAuth({ accessToken, refreshToken, user: userData }));
         successNotification("Đăng nhập Google thành công!");
+        return userData;
     };
 
     // Hàm thêm mới — lưu token & user (dùng khi đăng ký)
@@ -621,6 +616,190 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const getAllPatients = async () => {
+        try {
+            const res = await api.get("/profile/patient/getAll", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách bệnh nhân!");
+            throw err;
+        }
+    };
+
+    const getAllDoctors = async () => {
+        try {
+            const res = await api.get("/profile/doctor/getAll", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách bác sĩ!");
+            throw err;
+        }
+    };
+
+    const uploadMedia = async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        try {
+            const res = await api.post("/media/upload", formData, {
+                headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'multipart/form-data' },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải lên tệp!");
+            throw err;
+        }
+    };
+
+    const getMedia = async (mediaId) => {
+        try {
+            const res = await api.get(`/media/${mediaId}/image`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                responseType: 'blob',  // Quan trọng: để axios trả blob cho image
+            });
+            return res.data;  // Blob
+        } catch (err) {
+            errorNotification("Không thể tải ảnh!");
+            throw err;
+        }
+    };
+
+    const saveImageId = async (id, imageId) => {
+        try {
+            const res = await api.put(`/user/saveImageId/${id}/${imageId}`);
+            successNotification("Cập nhật hình ảnh thành công!");
+            console.log('Save image success:', res.data); // Log để debug
+            return res.data;
+        } catch (err) {
+            console.error('Save image error:', err); // Log để debug
+            errorNotification("Cập nhật hình ảnh thất bại!");
+            throw err;
+        }
+    };
+
+    const getMonthlyRegistrations = async () => {
+        try {
+            const res = await api.get("/user/get-registrations-count", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải dữ liệu đăng ký hàng tháng!");
+            throw err;
+        }
+    };
+
+    const getAppointmentCountByPatient = async (patientId) => {
+        try {
+            const res = await api.get(`/appointment/countByPatient/${patientId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải số lượng lịch hẹn của bệnh nhân!");
+            throw err;
+        }
+    };
+
+    const getAppointmentCountByDoctor = async (doctorId) => {
+        try {
+            const res = await api.get(`/appointment/countByDoctor/${doctorId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải số lượng lịch hẹn của bác sĩ!");
+            throw err;
+        }
+    };
+
+    const getAppointmentCount = async () => {
+        try {
+            const res = await api.get("/appointment/count", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải số lượng lịch hẹn!");
+            throw err;
+        }
+    };
+
+    const getReasonsCountByPatient = async (patientId) => {
+        try {
+            const res = await api.get(`/appointment/reasonCountByPatient//${patientId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải số lượng lý do lịch hẹn của bệnh nhân!");
+            throw err;
+        }
+    };
+
+    const getReasonsCountByDoctor = async (doctorId) => {
+        try {
+            const res = await api.get(`/appointment/reasonCountByDoctor/${doctorId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải số lượng lý do lịch hẹn của bác sĩ!");
+            throw err;
+        }
+    };
+
+    const getReasonsCount = async () => {
+        try {
+            const res = await api.get("/appointment/reasonCount", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải số lượng lý do lịch hẹn!");
+            throw err;
+        }
+    };
+
+    const getMedicineByPatientId = async (patientId) => {
+        try {
+            const res = await api.get(`/appointment/report/getMedicinesByPatientId/${patientId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải thông tin thuốc của bệnh nhân!");
+            throw err;
+        }
+    };
+
+    const getTodaysAppointments = async () => {
+        try {
+            const res = await api.get("/appointment/todaysAppointments", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách lịch hẹn hôm nay!");
+            throw err;
+        }
+    };
+
+    const getApRecordDetail = async (appointmentId) => {
+        try {
+            const res = await api.get(`/appointment/report/getAp/detail/${appointmentId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải chi tiết hồ sơ khám!");
+            throw err;
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -668,6 +847,21 @@ export const AuthProvider = ({ children }) => {
                 getMedicineDropdown,
                 getAllPrescriptions,
                 getMedicinesByPrescriptionId,
+                getAllPatients,
+                getAllDoctors,
+                uploadMedia,
+                getMedia,
+                saveImageId,
+                getMonthlyRegistrations,
+                getAppointmentCountByPatient,
+                getAppointmentCountByDoctor,
+                getAppointmentCount,
+                getReasonsCountByPatient,
+                getReasonsCountByDoctor,
+                getReasonsCount,
+                getMedicineByPatientId,
+                getTodaysAppointments,
+                getApRecordDetail,
                 logout,
                 refresh,
             }}

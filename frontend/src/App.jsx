@@ -6,7 +6,10 @@ import AppRouter from './Routers/AppRouter'
 import { Notifications } from '@mantine/notifications'
 import '@mantine/notifications/styles.css'
 import '@mantine/spotlight/styles.css'
+import '@mantine/dropzone/styles.css';
+import '@mantine/charts/styles.css';
 import { PrimeReactProvider } from 'primereact/api';
+import FloatingVideo from './Pages/FloatingVideo'
 
 
 const theme = createTheme({
@@ -31,6 +34,7 @@ function App() {
       <PrimeReactProvider>
         <Notifications />
         <AppRouter />
+        <FloatingVideo />
       </PrimeReactProvider>
     </MantineProvider>
   )

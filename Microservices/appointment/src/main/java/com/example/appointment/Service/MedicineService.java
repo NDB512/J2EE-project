@@ -9,4 +9,5 @@ public interface MedicineService {
     public Long saveMedicine (MedicineDto medicineDto) throws ApException;
     public List<MedicineDto> saveAllMedicines (List<MedicineDto> medicineDtos) throws ApException;
     public List<MedicineDto> getAllMedicinesByPrescriptionId (Long PrescriptioId) throws ApException;
+    public List<MedicineDto> getAllMedicinesByPrescriptionIdIn (List<Long> PrescriptioIds) throws ApException;
 }

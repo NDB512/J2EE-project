@@ -7,12 +7,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.Dto.AuthResponse;
+import com.example.backend.Dto.RegistrationCountDto;
 import com.example.backend.Dto.UserDto;
 import com.example.backend.Exception.BeException;
 import com.example.backend.Services.UserService;
@@ -88,5 +92,16 @@ public class UserApi {
         } catch (Exception e) {
             throw new BeException("Refresh failed: " + e.getMessage());
         }
+    }
+
+    @PutMapping("/saveImageId/{id}/{profileImageUrlId}")
+    public ResponseEntity<Void> saveImageId(@PathVariable Long id, @PathVariable Long profileImageUrlId) throws BeException {
+        userService.saveImageId(id, profileImageUrlId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/get-registrations-count")
+    public ResponseEntity<RegistrationCountDto> getMonthlyRegistrations() throws BeException {
+        return new ResponseEntity<>(userService.getMonthlyRegistrations(), HttpStatus.OK);
     }
 }

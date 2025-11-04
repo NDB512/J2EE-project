@@ -40,7 +40,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
+                if (jwtUtil == null) { // Debug: Kiểm tra null
+                    logger.error("JwtUtil is null - DI failed!");
+                    throw new RuntimeException("JwtUtil not injected");
+                }
                 username = jwtUtil.extractUsername(token);
+                logger.debug("Extracted username from token: {}", username); // Debug log
             }
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -50,19 +55,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    logger.debug("User authenticated: {}", username);
                 } else {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("{\"error\": \"Invalid token\"}");
+                    sendErrorResponse(response, "Invalid token");
                     return;
                 }
             }
         } catch (Exception e) {
-            logger.error("JWT validation failed: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"Token malformed or expired\"}");
+            logger.error("JWT validation failed: {}", e.getMessage(), e); // Log full exception
+            sendErrorResponse(response, "Token malformed or expired: " + e.getMessage());
             return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    // Helper: Gửi JSON error chuẩn
+    private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
+    }
+
+    // Optional: Skip filter cho public paths (tối ưu performance)
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/user/register") || path.startsWith("/user/login") ||
+               path.startsWith("/user/login/google") || path.startsWith("/user/refresh");
     }
 }

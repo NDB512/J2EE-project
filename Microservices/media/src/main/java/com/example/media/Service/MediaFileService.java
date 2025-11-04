@@ -12,4 +12,6 @@ public interface MediaFileService {
     public MediaFileDto storeFile(MultipartFile file) throws IOException;
     
     public Optional<MediaFile> getFile(Long id);
+
+    public boolean deleteFile(Long id);
 }

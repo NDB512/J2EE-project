@@ -11,4 +11,7 @@ public class MedicineListDto {
     private Long id;
     private String name;
     private Integer unitPrice;
+    private Integer stock;
+    private String dosage;
+    private String manufacturer;
 }

@@ -223,4 +223,12 @@ const categoryOptions = [
   { value: "Vaccine", label: "Vaccine" },
 ];
 
-export { bloodGroups, genders, maritalStatuses, doctorSpecializations, visitReasons, Symptoms, Tests, dosagePatternOptions, routeOptions, typeOptions, categoryOptions  };
+const data = [
+  { date: '2025-10-01', appointments: 12, patients: 8, doctors: 3 },
+  { date: '2025-10-02', appointments: 15, patients: 10, doctors: 4 },
+  { date: '2025-10-03', appointments: 9, patients: 6, doctors: 2 },
+];
+
+
+export { bloodGroups, genders, maritalStatuses, doctorSpecializations, 
+  visitReasons, Symptoms, Tests, dosagePatternOptions, routeOptions, typeOptions, categoryOptions, data  };

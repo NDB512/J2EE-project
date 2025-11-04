@@ -26,7 +26,7 @@ public class MediaFile {
     private Long size;
 
     @Lob
-    @Column(nullable = true)
+    @Column(columnDefinition = "LONGBLOB", nullable = true)
     private byte[] data; // chỉ dùng khi lưu trong DB
 
     private String url; // dùng cho S3 / GC / AC

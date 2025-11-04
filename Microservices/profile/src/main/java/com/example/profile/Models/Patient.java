@@ -51,11 +51,19 @@ public class Patient {
 
     private BloodType bloodType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "family_id")
+    private Family family;
+
+    @Column(name = "role_in_family")
+    private String roleInFamily;
+
     public PatientDto toDto() {
         PatientDto dto = new PatientDto();
         dto.setId(this.id);
         dto.setName(this.name);
         dto.setPhone(this.phone);
+        dto.setEmail(this.email);
         dto.setGender(gender);
         dto.setAllergies(this.allergies);
         dto.setAddress(this.address);
@@ -63,9 +71,13 @@ public class Patient {
         dto.setEmergencyContact(this.emergencyContact);
         dto.setInsuranceDetails(this.insuranceDetails);
         dto.setDateOfBirth(this.dateOfBirth);
+        dto.setCitizenId(this.citizenId);
         dto.setCreatedAt(this.createdAt);
         dto.setUpdatedAt(this.updatedAt);
         dto.setBloodType(this.bloodType);
+
+        dto.setFamilyId(this.family != null ? this.family.getId() : null);
+        dto.setRoleInFamily(this.roleInFamily);
         return dto;
     }
 }

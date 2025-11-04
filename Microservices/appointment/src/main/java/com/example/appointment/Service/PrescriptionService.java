@@ -2,6 +2,7 @@ package com.example.appointment.Service;
 
 import java.util.List;
 
+import com.example.appointment.Dto.MedicineDto;
 import com.example.appointment.Dto.PrescriptionDetails;
 import com.example.appointment.Dto.PrescriptionDto;
 import com.example.appointment.Exception.ApException;
@@ -13,4 +14,5 @@ public interface PrescriptionService {
     public List<PrescriptionDetails> getPrescriptionsByPatientId(Long patientId) throws ApException;
     public List<PrescriptionDetails> getPrescriptions() throws ApException;
     public void markAsSold(Long id);
+    public List<MedicineDto> getMedicineByPatient(Long patientId) throws ApException;
 }

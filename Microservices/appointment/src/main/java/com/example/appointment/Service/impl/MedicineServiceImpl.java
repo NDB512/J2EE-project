@@ -20,6 +20,7 @@ public class MedicineServiceImpl implements MedicineService {
     
     private final MedicineRepository medicineRepository;
 
+    @SuppressWarnings("null")
     @Override
     public Long saveMedicine(MedicineDto medicineDto) throws ApException {
         return medicineRepository.save(medicineDto.toEntity()).getId();
@@ -27,6 +28,7 @@ public class MedicineServiceImpl implements MedicineService {
 
    @Override
     public List<MedicineDto> saveAllMedicines(List<MedicineDto> medicineDtos) throws ApException {
+        @SuppressWarnings("null")
         List<Medicine> savedEntities = (List<Medicine>) medicineRepository.saveAll(
             medicineDtos.stream().map(MedicineDto::toEntity).toList()
         );
@@ -36,6 +38,11 @@ public class MedicineServiceImpl implements MedicineService {
     @Override
     public List<MedicineDto> getAllMedicinesByPrescriptionId(Long PrescriptioId) throws ApException {
         return ((List<Medicine>)medicineRepository.findAllByPrescriptionId(PrescriptioId)).stream().map(Medicine::toDto).toList();
+    }
+
+    @Override
+    public List<MedicineDto> getAllMedicinesByPrescriptionIdIn(List<Long> PrescriptioIds) throws ApException {
+        return ((List<Medicine>)medicineRepository.findAllByPrescriptionIdIn(PrescriptioIds)).stream().map(Medicine::toDto).toList();
     }
     
 }

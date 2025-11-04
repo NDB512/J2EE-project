@@ -1,5 +1,8 @@
 package com.example.appointment.Dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum BloodType {
     A_POSITIVE("A+"),
     A_NEGATIVE("A-"),
@@ -16,7 +19,18 @@ public enum BloodType {
         this.label = label;
     }
 
+    @JsonValue
     public String getLabel() {
         return label;
+    }
+
+    @JsonCreator
+    public static BloodType fromValue(String value) {
+        for (BloodType type : values()) {
+            if (type.label.equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Unknown blood type: " + value);
     }
 }

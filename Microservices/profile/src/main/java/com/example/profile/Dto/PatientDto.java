@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.example.profile.Models.Family;
 import com.example.profile.Models.Patient;
 
 import lombok.AllArgsConstructor;
@@ -31,6 +32,8 @@ public class PatientDto {
     private BloodType bloodType;
     private String allergies; // Dị ứng
     private String chronicDisease; // Bệnh mã
+    private Long familyId; // ID của Family liên kết
+    private String roleInFamily; // Vai trò trong gia đình
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -53,6 +56,8 @@ public class PatientDto {
         patient.setInsuranceDetails(insuranceDetails);
         patient.setDateOfBirth(dateOfBirth);
         patient.setBloodType(bloodType);
+        patient.setFamily(new Family(familyId));
+        patient.setRoleInFamily(roleInFamily);
         return patient;
     }
 }

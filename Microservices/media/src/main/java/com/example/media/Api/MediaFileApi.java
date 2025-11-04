@@ -57,4 +57,27 @@ public class MediaFileApi {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable Long id) {
+        Optional<MediaFile> mediaFileOptional = mediaFileService.getFile(id);
+        if (mediaFileOptional.isPresent()) {
+            MediaFile mediaFile = mediaFileOptional.get();
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(mediaFile.getType()))
+                    .contentLength(mediaFile.getData().length)
+                    .body(mediaFile.getData());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFile(@PathVariable Long id) {
+        if (mediaFileService.deleteFile(id)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

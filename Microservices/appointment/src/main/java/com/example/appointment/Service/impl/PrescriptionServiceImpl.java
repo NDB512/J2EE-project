@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.appointment.Clients.ProfileClient;
 import com.example.appointment.Dto.DoctorName;
+import com.example.appointment.Dto.MedicineDto;
 import com.example.appointment.Dto.PatientName;
 import com.example.appointment.Dto.PrescriptionDetails;
 import com.example.appointment.Dto.PrescriptionDto;
@@ -33,6 +34,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 
     @Override
     public Long savePrescription(PrescriptionDto prescriptionDto) {
+        @SuppressWarnings("null")
         Long id = prescriptionRepository.save(prescriptionDto.toEntity()).getId();
         prescriptionDto.getMedicines().forEach(medicine -> {
             medicine.setPrescriptionId(id);
@@ -51,6 +53,7 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 
     @Override
     public PrescriptionDto getPrescriptionById(Long prescriptionId) {
+        @SuppressWarnings("null")
         PrescriptionDto dto = prescriptionRepository.findById(prescriptionId).orElseThrow(()->new ApException("Không tìm thấy toa thuốc với id: "+ prescriptionId)).toDto();
 
         dto.setMedicines(medicineService.getAllMedicinesByPrescriptionId(prescriptionId));
@@ -121,9 +124,16 @@ public class PrescriptionServiceImpl implements PrescriptionService{
 
     @Override
     public void markAsSold(Long id) throws ApException {
+        @SuppressWarnings("null")
         Prescription prescription = prescriptionRepository.findById(id)
             .orElseThrow(() -> new ApException("Không tìm thấy đơn thuốc!"));
         prescription.setSold(true);
         prescriptionRepository.save(prescription);
+    }
+
+    @Override
+    public List<MedicineDto> getMedicineByPatient(Long patientId) throws ApException {
+        List<Long> preIds = prescriptionRepository.findAllPreIdsByPatient(patientId);
+        return medicineService.getAllMedicinesByPrescriptionIdIn(preIds);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.example.profile.Dto.DoctorDropdown;
 import com.example.profile.Dto.DoctorDto;
 import com.example.profile.Exception.PrException;
+import com.example.profile.Models.Doctor;
 
 @Service
 public class DoctorServiceImpl implements com.example.profile.Service.DoctorService {
@@ -15,6 +16,7 @@ public class DoctorServiceImpl implements com.example.profile.Service.DoctorServ
     @Autowired
     private com.example.profile.Repository.DoctorRepository doctorRepository;
 
+    @SuppressWarnings("null")
     @Override
     public Long addDoctor(DoctorDto doctor) throws PrException {
         if(doctor.getEmail()!=null && doctorRepository.findByEmail(doctor.getEmail()).isPresent()) {
@@ -26,6 +28,7 @@ public class DoctorServiceImpl implements com.example.profile.Service.DoctorServ
         return doctorRepository.save(doctor.toEntity()).getId();
     }
 
+    @SuppressWarnings("null")
     @Override
     public DoctorDto getDoctorById(Long id) {
         return doctorRepository.findById(id)
@@ -33,6 +36,7 @@ public class DoctorServiceImpl implements com.example.profile.Service.DoctorServ
                 .toDto();
     }
 
+    @SuppressWarnings("null")
     @Override
     public DoctorDto updateDoctor(Long id, DoctorDto doctor) throws PrException {
         doctorRepository.findById(id)
@@ -42,6 +46,7 @@ public class DoctorServiceImpl implements com.example.profile.Service.DoctorServ
         return doctorRepository.save(doctor.toEntity()).toDto();
     }
 
+    @SuppressWarnings("null")
     @Override
     public Boolean doctorExists(Long id) {
         return doctorRepository.existsById(id);
@@ -55,6 +60,11 @@ public class DoctorServiceImpl implements com.example.profile.Service.DoctorServ
     @Override
     public List<DoctorDropdown> getDoctorsById(List<Long> ids) throws PrException {
         return doctorRepository.findAllDoctorDropdownsByIds(ids);
+    }
+
+    @Override
+    public List<DoctorDto> getAllDoctors() throws PrException {
+        return ((List<Doctor>)doctorRepository.findAll()).stream().map(Doctor::toDto).toList();
     }
     
 }

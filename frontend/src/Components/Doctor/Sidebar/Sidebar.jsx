@@ -1,5 +1,5 @@
 // src/Layout/Doctor/Sidebar.jsx
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {
   IconHeartbeat,
   IconLayoutGrid,
@@ -16,11 +16,33 @@ const doctorLinks = [
     { name: "Hồ sơ", href: "/doctor/profile", icon: <IconMoodHeart size={20} /> },
     { name: "Bệnh nhân", href: "/doctor/patients", icon: <IconMoodHeart size={20} /> },
     { name: "Cuộc hẹn", href: "/doctor/appointments", icon: <IconCalendarCheck size={20} /> },
-    { name: "Đơn thuốc", href: "/doctor/prescriptions", icon: <IconMoodHeart size={20} /> },
+    // { name: "Đơn thuốc", href: "/doctor/prescriptions", icon: <IconMoodHeart size={20} /> },
 ];
 
 const Sidebar = ({ isOpen }) => {
-    const { user } = useAuth();
+    const { user, getMedia } = useAuth();
+
+    const [avatarSrc, setAvatarSrc] = useState('/vite.svg');
+    
+    useEffect(() => {
+        if (!user) return;
+        const loadAvatar = async () => {
+            try {
+            if (user.profileImageUrlId) {
+                const mediaData = await getMedia(user.profileImageUrlId);
+                const blob = new Blob([mediaData], { type: 'image/jpeg' });
+                const url = URL.createObjectURL(blob);
+                setAvatarSrc(url);
+            } else {
+                setAvatarSrc('/vite.svg');
+            }
+            } catch (err) {
+                console.error('Lỗi load avatar:', err);
+                setAvatarSrc('/vite.svg');
+                }
+            };
+            loadAvatar();
+    }, [user]); 
 
     if (!isOpen) return null;
 
@@ -40,7 +62,7 @@ const Sidebar = ({ isOpen }) => {
                         <Avatar
                         variant="filled"
                         size={48}
-                        src={user?.avatar || "/vite.svg"}
+                        src={avatarSrc || "/vite.svg"}
                         alt="User Avatar"
                         />
                     </div>

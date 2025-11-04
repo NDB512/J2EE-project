@@ -10,7 +10,7 @@ const AdminDashboard = () => {
             {/* Sidebar */}
             {isSidebarOpen && (
                 <div className="w-64 bg-white border-r overflow-y-auto">
-                <Sidebar isOpen={isSidebarOpen} />
+                    <Sidebar isOpen={isSidebarOpen} />
                 </div>
             )}
 
@@ -18,7 +18,7 @@ const AdminDashboard = () => {
             <div className="flex flex-col flex-1 overflow-y-auto">
                 <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
                 <div className="flex-1 p-4">
-                <Outlet />
+                    <Outlet />
                 </div>
             </div>
         </div>

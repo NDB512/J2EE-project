@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/charts": "^8.3.6",
     "@mantine/core": "^8.3.6",
     "@mantine/dates": "^8.3.6",
+    "@mantine/dropzone": "^8.3.6",
     "@mantine/form": "^8.3.3",
     "@mantine/hooks": "^8.3.6",
     "@mantine/notifications": "^8.3.6",

@@ -10,13 +10,17 @@ import com.example.appointment.Dto.AppointmentDetails;
 import com.example.appointment.Dto.AppointmentDto;
 import com.example.appointment.Dto.AppointmentStatus;
 import com.example.appointment.Dto.DoctorDto;
+import com.example.appointment.Dto.MonthlyVisitDto;
 import com.example.appointment.Dto.PatientDto;
+import com.example.appointment.Dto.ReasonCountDto;
 import com.example.appointment.Exception.ApException;
 import com.example.appointment.Models.Appointment;
 import com.example.appointment.Repository.AppointmentRepository;
 import com.example.appointment.Service.AppointmentService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +35,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final ProfileClient profileClient;
 
     private AppointmentDto toDto(Appointment entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity cannot be null");
+        }
         AppointmentDto dto = new AppointmentDto();
         BeanUtils.copyProperties(entity, dto);
         return dto;
@@ -38,6 +45,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private Appointment toEntity(AppointmentDto dto) {
         Appointment entity = new Appointment();
+        if (dto == null) {
+            throw new IllegalArgumentException("Dto cannot be null");
+        }
         BeanUtils.copyProperties(dto, entity);
         return entity;
     }
@@ -51,6 +61,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public Optional<AppointmentDto> getAppointmentById(Long id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         return repository.findById(id).map(this::toDto);
     }
 
@@ -75,6 +88,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentDto updateAppointment(Long id, AppointmentDto dto) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID không được null");
+        }
+        // Explicit null check for id to satisfy @NonNull contract
         Appointment existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy cuộc hẹn ID: " + id));
 
@@ -88,6 +105,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentDto updateStatus(Long id, AppointmentStatus newStatus, String reason, LocalDateTime newDateTime) throws ApException {
+        if (id == null) {
+            throw new IllegalArgumentException("ID không được null");
+        }
         Appointment existing = repository.findById(id)
                 .orElseThrow(() -> new ApException("Không tìm thấy cuộc hẹn ID: " + id));
 
@@ -172,6 +192,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public void deleteAppointment(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID không được null");
+        }
         if (!repository.existsById(id)) {
             throw new RuntimeException("Không tìm thấy cuộc hẹn ID: " + id);
         }
@@ -242,6 +265,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
    @Override
     public void cancelAppointment(Long id, String reason) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID không được null");
+        }
         Appointment appointment = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy cuộc hẹn ID: " + id));
 
@@ -258,5 +284,91 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setCancelledAt(LocalDateTime.now());
 
         repository.save(appointment);
+    }
+
+    @Override
+    public List<MonthlyVisitDto> getAppointmentCountByPatient(Long patientId) throws ApException {
+            try {
+                List<MonthlyVisitDto> visitCounts = repository.countCurrentYearVisitsByPatient(patientId);
+                return visitCounts;
+            } catch (Exception e) {
+                throw new ApException("Lỗi khi lấy số lượng cuộc hẹn hàng tháng: " + e.getMessage());
+            }
+    }
+
+    @Override
+    public List<MonthlyVisitDto> getAppointmentCountByDoctor(Long doctorId) throws ApException {
+        try {
+            List<MonthlyVisitDto> visitCounts = repository.countCurrentYearVisitsByDoctor(doctorId);
+            return visitCounts;
+        } catch (Exception e) {
+            throw new ApException("Lỗi khi lấy số lượng cuộc hẹn hàng tháng: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<MonthlyVisitDto> getAppointmentCount() throws ApException {
+        try {
+            List<MonthlyVisitDto> visitCounts = repository.countAllVisits();
+            return visitCounts;
+        } catch (Exception e) {
+            throw new ApException("Lỗi khi lấy số lượng cuộc hẹn hàng tháng: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<ReasonCountDto> getReasonsCountByPatient(Long patientId) throws ApException {
+        try {
+            List<ReasonCountDto> reasonCounts = repository.countReasonsByPatient(patientId);
+            return reasonCounts;
+        } catch (Exception e) {
+            throw new ApException("Lỗi khi lấy số lượng lý do cuộc hẹn: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<ReasonCountDto> getReasonsCountByDoctor(Long doctorId) throws ApException {
+        try {
+            List<ReasonCountDto> reasonCounts = repository.countReasonsByDoctor(doctorId);
+            return reasonCounts;
+        } catch (Exception e) {
+            throw new ApException("Lỗi khi lấy số lượng lý do cuộc hẹn: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<ReasonCountDto> getReasonsCountForAll() throws ApException {
+        try {
+            List<ReasonCountDto> reasonCounts = repository.countReasonsForAll();
+            return reasonCounts;
+        } catch (Exception e) {
+            throw new ApException("Lỗi khi lấy số lượng lý do cuộc hẹn: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<AppointmentDetails> getTodaysAppointments() throws ApException {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        return repository.findByAppointmentDateBetween(startOfDay, endOfDay).stream().map(appointment -> {
+            DoctorDto doctorDto  = profileClient.getDoctorById(appointment.getDoctorId());
+            PatientDto patientDto = profileClient.getPatientById(appointment.getPatientId());
+
+            return new AppointmentDetails(appointment.getId(), appointment.getPatientId(), 
+                patientDto != null ? patientDto.getName() : "Không xác định",
+                appointment.getDoctorId(),
+                doctorDto != null ? doctorDto.getName() : "Không xác định",
+                appointment.getAppointmentDate(),
+                appointment.getReason(),
+                appointment.getNotes(),
+                appointment.getStatus(),
+                appointment.getLocation(),
+                appointment.getStatusReason(),
+                appointment.getCompletedAt(),
+                appointment.getCancelledAt()
+            );
+        }).toList();
     }
 }

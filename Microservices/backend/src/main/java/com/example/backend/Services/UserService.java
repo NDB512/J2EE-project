@@ -3,6 +3,7 @@ package com.example.backend.Services;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.backend.Dto.AuthResponse;
+import com.example.backend.Dto.RegistrationCountDto;
 import com.example.backend.Dto.UserDto;
 import com.example.backend.Exception.BeException;
 
@@ -14,4 +15,7 @@ public interface UserService {
     public AuthResponse googleLogin(String idToken) throws BeException;
     UserDetails loadUserByUsername(String email);
     public UserDto getUserByEmail(String email) throws BeException;
+    void saveImageId(Long id, Long profileImageUrlId) throws BeException;
+
+    public RegistrationCountDto getMonthlyRegistrations() throws BeException;
 }

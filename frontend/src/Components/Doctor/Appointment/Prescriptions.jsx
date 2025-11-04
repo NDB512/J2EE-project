@@ -50,7 +50,7 @@ const Prescriptions = ({ patientId }) => {
     return (
         <div className="p-4">
         <h2 className="text-xl font-semibold mb-3 text-indigo-600">
-            Danh sách đơn thuốc của bệnh nhân
+            Danh sách đơn thuốc của bệnh nhân trước đây
         </h2>
 
         <DataTable

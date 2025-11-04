@@ -7,6 +7,8 @@ import java.util.Optional;
 import com.example.appointment.Dto.AppointmentDetails;
 import com.example.appointment.Dto.AppointmentDto;
 import com.example.appointment.Dto.AppointmentStatus;
+import com.example.appointment.Dto.MonthlyVisitDto;
+import com.example.appointment.Dto.ReasonCountDto;
 import com.example.appointment.Exception.ApException;
 
 public interface AppointmentService {
@@ -21,4 +23,13 @@ public interface AppointmentService {
     AppointmentDetails getAppointmentDetailsWithName(Long id) throws ApException;
     public List<AppointmentDetails> getAllAppointmentsByPatientId(Long patientId) throws ApException;
     public List<AppointmentDetails> getAllAppointmentsByDoctorId(Long doctorId) throws ApException;
+
+    public List<MonthlyVisitDto> getAppointmentCountByPatient(Long patientId) throws ApException;
+    public List<MonthlyVisitDto> getAppointmentCountByDoctor(Long doctorId) throws ApException;
+    public List<MonthlyVisitDto> getAppointmentCount() throws ApException;
+    public List<ReasonCountDto> getReasonsCountByPatient(Long patientId) throws ApException;
+    public List<ReasonCountDto> getReasonsCountByDoctor(Long doctorId) throws ApException;
+    public List<ReasonCountDto> getReasonsCountForAll() throws ApException;
+
+    public List<AppointmentDetails> getTodaysAppointments() throws ApException;
 }

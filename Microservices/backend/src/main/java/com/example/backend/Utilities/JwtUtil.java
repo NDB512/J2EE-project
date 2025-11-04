@@ -70,6 +70,7 @@ public class JwtUtil {
             claims.put("email", custom.getEmail());
             claims.put("role", custom.getRole().name());
             claims.put("profileId", custom.getProfileId());
+            claims.put("profileImageUrlId", custom.getProfileImageUrlId());
         }
         // Giữ roles list cho Spring Security
         claims.put("roles", userDetails.getAuthorities().stream()
@@ -84,7 +85,7 @@ public class JwtUtil {
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>(); // Không embed cho refresh (hoặc embed nếu cần)
+        Map<String, Object> claims = new HashMap<>();
         return createToken(claims, userDetails.getUsername(), refreshExpiration);
     }
 

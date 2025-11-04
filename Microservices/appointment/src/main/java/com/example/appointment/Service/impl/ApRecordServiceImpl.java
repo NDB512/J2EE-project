@@ -67,7 +67,11 @@ public class ApRecordServiceImpl implements ApRecordService{
 
     @Override
     public void updateApRecorad(ApRecordDto apRecordDto) throws ApException {
-        ApRecord existingRecord = apRecordRepository.findById(apRecordDto.getId()).orElseThrow(()->new ApException("Không tìm thấy hồ sơ khám!"));
+        Long recordId = apRecordDto.getId();
+        if (recordId == null) {
+            throw new ApException("ID hồ sơ khám không được để trống!");
+        }
+        ApRecord existingRecord = apRecordRepository.findById(recordId).orElseThrow(() -> new ApException("Không tìm thấy hồ sơ khám!"));
 
         existingRecord.setNotes(apRecordDto.getNotes());
         existingRecord.setDiagnosis(apRecordDto.getDiagnosis());

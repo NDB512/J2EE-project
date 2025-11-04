@@ -38,5 +38,13 @@ public class MediaFileServiceImpl implements MediaFileService {
     public Optional<MediaFile> getFile(Long id) {
         return mediaFileRepository.findById(id);
     }
-    
+
+    @Override
+    public boolean deleteFile(Long id) {
+        if (mediaFileRepository.existsById(id)) {
+            mediaFileRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }

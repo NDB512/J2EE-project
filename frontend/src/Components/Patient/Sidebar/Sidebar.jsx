@@ -1,5 +1,5 @@
 // src/Layout/Patient/Sidebar.jsx
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {
     IconHeartbeat,
     IconLayoutGrid,
@@ -12,12 +12,34 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../../../Content/AuthContext";
 
 const Sidebar = ({ isOpen }) => {
-    const { user } = useAuth();
+    const { user, getMedia } = useAuth();
+
+    const [avatarSrc, setAvatarSrc] = useState('/vite.svg');
+    
+    useEffect(() => {
+        if (!user) return;
+        const loadAvatar = async () => {
+            try {
+            if (user.profileImageUrlId) {
+                const mediaData = await getMedia(user.profileImageUrlId);
+                const blob = new Blob([mediaData], { type: 'image/jpeg' });
+                const url = URL.createObjectURL(blob);
+                setAvatarSrc(url);
+            } else {
+                setAvatarSrc('/vite.svg');
+            }
+            } catch (err) {
+                console.error('Lỗi load avatar:', err);
+                setAvatarSrc('/vite.svg');
+                }
+            };
+            loadAvatar();
+    }, [user]); 
 
     // Các menu cố định cho bệnh nhân
     const links = [
         { name: "Trang chủ", href: "/patient/dashboard", icon: <IconLayoutGrid size={20} /> },
-        { name: "Hồ sơ y tế gia đình", href: "/patient/profile", icon: <IconMoodHeart size={20} /> },
+        { name: "Hồ sơ y tế", href: "/patient/profile", icon: <IconMoodHeart size={20} /> },
         { name: "Cuộc hẹn", href: "/patient/appointments", icon: <IconCalendarCheck size={20} /> },
         { name: "Nhà thuốc", href: "/patient/pharmacy", icon: <IconVaccine size={20} /> },
     ];
@@ -40,7 +62,7 @@ const Sidebar = ({ isOpen }) => {
                         <Avatar
                         variant="filled"
                         size={48}
-                        src={user?.avatar || "/vite.svg"}
+                        src={avatarSrc}
                         alt="User Avatar"
                         />
                     </div>

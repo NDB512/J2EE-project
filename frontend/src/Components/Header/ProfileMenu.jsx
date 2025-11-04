@@ -8,18 +8,41 @@ import {
   IconArrowsLeftRight,
 } from '@tabler/icons-react';
 import { useAuth } from '../../Content/AuthContext';
+import { useEffect, useState } from 'react';
 
 const ProfileMenu = () => {
-  const { user } = useAuth();
+  const { user, getMedia } = useAuth();
 
   const userName = user?.name || user?.email?.split('@')[0] || 'Khách';
+
+  const [avatarSrc, setAvatarSrc] = useState('/vite.svg');
+
+  useEffect(() => {
+      if (!user) return;
+      const loadAvatar = async () => {
+          try {
+          if (user.profileImageUrlId) {
+              const mediaData = await getMedia(user.profileImageUrlId);
+              const blob = new Blob([mediaData], { type: 'image/jpeg' });
+              const url = URL.createObjectURL(blob);
+              setAvatarSrc(url);
+          } else {
+              setAvatarSrc('/vite.svg');
+          }
+          } catch (err) {
+              console.error('Lỗi load avatar:', err);
+              setAvatarSrc('/vite.svg');
+              }
+          };
+          loadAvatar();
+  }, [user]);
 
   return (
     <Menu shadow="md" width={200}>
       <Menu.Target>
         <div className="flex items-center gap-3 cursor-pointer">
           <span className="font-medium text-lg text-neutral-900">{userName}</span>
-          <Avatar variant="filled" size={45} src="/vite.svg" />
+          <Avatar variant="filled" size={45} src={avatarSrc} />
         </div>
       </Menu.Target>
 

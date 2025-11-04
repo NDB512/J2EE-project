@@ -19,6 +19,11 @@ import DoctorAppointmentDetailPage from "../Pages/Doctor/DoctorAppointmentDetail
 import AdminMedicinePage from "../Pages/Admin/AdminMedicinePage";
 import AdminInventoryPage from "../Pages/Admin/AdminInventoryPage";
 import AdminSalePage from "../Pages/Admin/AdminSalePage";
+import AdminPatientPage from "../Pages/Admin/AdminPatientPage";
+import AdminDoctorPage from "../Pages/Admin/AdminDoctorPage";
+import AdminDashboardPage from "../Pages/Admin/AdminDashboardPage";
+import DoctorDashboardPage from "../Pages/Doctor/DoctorDashboardPage";
+import PatientDashboardPage from "../Pages/Patient/PatientDashboardPage";
 
 const AppRouter = () => {
   return (
@@ -26,9 +31,9 @@ const AppRouter = () => {
             <Route path="/login" element={ <PublicRoute> <LoginPage /> </PublicRoute>} />
             <Route path="/register" element={<PublicRoute> <RegisterPage /> </PublicRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={["Admin"]}> <AdminDashboard /> </ProtectedRoute>}>
-                <Route path="dashboard" element={<Random />} />
-                <Route path="doctor" element={<Random />} />
-                <Route path="patients" element={<Random />} />
+                <Route path="dashboard" element={<AdminDashboardPage />} />
+                <Route path="doctor" element={<AdminDoctorPage />} />
+                <Route path="patients" element={<AdminPatientPage />} />
                 <Route path="appointments" element={<Random />} />
                 <Route path="medicine" element={<AdminMedicinePage />} />
                 <Route path="inventory" element={<AdminInventoryPage />} />
@@ -36,7 +41,7 @@ const AppRouter = () => {
             </Route>
 
             <Route path="/patient" element={<ProtectedRoute allowedRoles={["Patient"]}> <PatientDashboard /> </ProtectedRoute>}>
-                <Route path="dashboard" element={<Random />} />
+                <Route path="dashboard" element={<PatientDashboardPage />} />
                 <Route path="profile" element={<PatientProfilePage />} />
                 <Route path="appointments" element={<PatientAppointmentPage />} />
                 <Route path="pharmacy" element={<Random />} />
@@ -44,7 +49,7 @@ const AppRouter = () => {
             </Route>
 
             <Route path="/doctor" element={<ProtectedRoute allowedRoles={["Doctor"]}> <DoctorDashboard /> </ProtectedRoute>}>
-                <Route path="dashboard" element={<Random />} />
+                <Route path="dashboard" element={<DoctorDashboardPage />} />
                 <Route path="profile" element={<DoctorProfilePage />} />
                 <Route path="patients" element={<Random />} />
                 <Route path="appointments" element={<DoctorAppointmentPage />} />

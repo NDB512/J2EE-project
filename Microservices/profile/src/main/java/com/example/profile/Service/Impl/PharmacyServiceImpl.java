@@ -15,6 +15,9 @@ public class PharmacyServiceImpl implements PharmacyService {
 
     @Override
     public Long addPharmacy(PharmacyDto pharmacy) throws PrException {
+        if(pharmacy == null) {
+            throw new PrException("Pharmacy data cannot be null.");
+        }
         if(pharmacy.getEmail()!=null && pharmacyRepository.findByEmail(pharmacy.getEmail()).isPresent()) {
             throw new PrException("Pharmacy with ID " + pharmacy.getId() + " already exists.");
         }
@@ -22,15 +25,21 @@ public class PharmacyServiceImpl implements PharmacyService {
             throw new PrException("Pharmacy with License Number " + pharmacy.getLicenseNumber() + " already exists.");
         }
 
-        return pharmacyRepository.save(pharmacy.toEntity()).getId();
+        var entity = pharmacy.toEntity();
+        if(entity == null) {
+            throw new PrException("Failed to convert pharmacy data to entity.");
+        }
+        return pharmacyRepository.save(entity).getId();
     }
 
+    @SuppressWarnings("null")
     @Override
     public PharmacyDto getPharmacyById(Long id) throws PrException {
         return pharmacyRepository.findById(id)
                 .orElseThrow(() -> new PrException("Pharmacy with ID " + id + " not found."))
                 .toDto();
     }
+    @SuppressWarnings("null")
     @Override
     public PharmacyDto updatePharmacy(Long id, PharmacyDto pharmacy) throws PrException {
         pharmacyRepository.findById(id)
@@ -40,6 +49,7 @@ public class PharmacyServiceImpl implements PharmacyService {
         return pharmacyRepository.save(pharmacy.toEntity()).toDto();
     }
 
+    @SuppressWarnings("null")
     @Override
     public Boolean pharmacyExists(Long id) {
         return pharmacyRepository.existsById(id);

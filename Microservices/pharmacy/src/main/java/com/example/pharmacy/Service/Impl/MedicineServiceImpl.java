@@ -1,6 +1,5 @@
 package com.example.pharmacy.Service.Impl;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,7 +76,10 @@ public class MedicineServiceImpl implements MedicineService {
                 .map(m -> new MedicineListDto(
                         m.getId(),
                         m.getName(),
-                        m.getUnitPrice()
+                        m.getUnitPrice(),
+                        m.getStock(),
+                        m.getDosage(),
+                        m.getManufacturer()
                 ))
                 .toList();
     }

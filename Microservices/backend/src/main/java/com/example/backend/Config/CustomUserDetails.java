@@ -15,14 +15,16 @@ public class CustomUserDetails implements UserDetails {
     private String password;
     private Roles role;
     private Long profileId;
+    private Long profileImageUrlId;
 
-    public CustomUserDetails(Long id, String name, String email, String password, Roles role, Long profileId) {
+    public CustomUserDetails(Long id, String name, String email, String password, Roles role, Long profileId, Long profileImageUrlId) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
         this.profileId = profileId;
+        this.profileImageUrlId = profileImageUrlId;
     }
 
     // Getters
@@ -31,6 +33,7 @@ public class CustomUserDetails implements UserDetails {
     public String getEmail() { return email; }
     public Roles getRole() { return role; }
     public Long getProfileId() { return profileId; }
+    public Long getProfileImageUrlId() { return profileImageUrlId; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

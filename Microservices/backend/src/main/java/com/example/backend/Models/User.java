@@ -1,5 +1,7 @@
 package com.example.backend.Models;
 
+import java.time.LocalDateTime;
+
 import com.example.backend.Dto.Roles;
 import com.example.backend.Dto.UserDto;
 
@@ -43,7 +45,26 @@ public class User {
 
     private String licenseNumber;
 
+    private Long profileImageUrlId;
+
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
     public UserDto toDto() {
-        return new UserDto(this.id, this.name, this.email, this.password, this.role, this.profileId, this.licenseNumber);
+        return new UserDto(this.id, this.name, this.email, this.password, this.role, this.profileId, this.licenseNumber, this.profileImageUrlId, this.createdAt, this.updatedAt);
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

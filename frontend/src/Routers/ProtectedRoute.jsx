@@ -11,9 +11,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
         return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
-    // Nếu có giới hạn role → kiểm tra xem role của user có hợp lệ không
-    if (allowedRoles && !allowedRoles.map(r => r.toLowerCase()).includes(user.role.toLowerCase())) {
-        console.log('Debug: User role:', user.role, 'Allowed:', allowedRoles); // Thêm log để debug nếu cần
+    const normalizedRole =
+        user.role?.toLowerCase() ||
+        user.roles?.[0]?.replace('ROLE_', '').toLowerCase();
+
+    if (allowedRoles && !allowedRoles.map(r => r.toLowerCase()).includes(normalizedRole)) {
+        console.log('Debug: User role:', normalizedRole, 'Allowed:', allowedRoles);
         return <Navigate to="/unauthorized" replace />;
     }
 

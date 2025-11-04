@@ -72,16 +72,23 @@ const LoginPage = () => {
 
             // Decode JWT để lấy user info
             const decoded = jwtDecode(data.accessToken);
+            console.log("Decoded JWT:", decoded);
             const userData = {
                 id: decoded.id,
                 name: decoded.name,
                 email: decoded.email,
                 role: decoded.role,
                 profileId: decoded.profileId,
+                profileImageUrlId: decoded.profileImageUrlId,
             };
 
+            // Trong handleGoogleSuccess, sau googleLogin
             googleLogin(data.accessToken, data.refreshToken, userData);
-            redirectByRole(decoded.role); // Sử dụng role từ decoded JWT
+            console.log("Before redirect, role:", decoded.role);  // Log này sẽ in
+            setTimeout(() => {
+                redirectByRole(decoded.role);
+            }, 1000);
+            console.log("After navigate call");  // Log này chạy?
         } catch (err) {
             errorNotification(err.message || 'Google login failed');
         } finally {
@@ -90,7 +97,10 @@ const LoginPage = () => {
     };
 
     useEffect(() => {
-        googleLogout();
+        if (localStorage.getItem('accessToken')) {
+            googleLogout();
+            localStorage.clear();
+        }
     }, []);
 
     return (
