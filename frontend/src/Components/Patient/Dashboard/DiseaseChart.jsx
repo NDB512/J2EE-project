@@ -13,7 +13,7 @@ const DiseaseChart = () => {
     return (
         <div className="p-3 rounded-xl bg-green-50 shadow-xl flex flex-col gap-3">
             <div className="text-lg font-semibold">
-                Phân bố các loại bệnh
+                Phân bố các loại bệnh của bạn
             </div>
             <div className="flex justify-center">
                 <DonutChart chartLabel={"Các bệnh"} thickness={25} withLabels paddingAngle={10} withLabelsLine labelsType="percent" data={diseaseData} size={200} />

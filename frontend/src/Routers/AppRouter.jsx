@@ -24,6 +24,7 @@ import AdminDoctorPage from "../Pages/Admin/AdminDoctorPage";
 import AdminDashboardPage from "../Pages/Admin/AdminDashboardPage";
 import DoctorDashboardPage from "../Pages/Doctor/DoctorDashboardPage";
 import PatientDashboardPage from "../Pages/Patient/PatientDashboardPage";
+import PatientFamilyProfile from "../Pages/Patient/PatientFamilyProfile";
 
 const AppRouter = () => {
   return (
@@ -44,6 +45,7 @@ const AppRouter = () => {
                 <Route path="dashboard" element={<PatientDashboardPage />} />
                 <Route path="profile" element={<PatientProfilePage />} />
                 <Route path="appointments" element={<PatientAppointmentPage />} />
+                <Route path="family" element={<PatientFamilyProfile />} />
                 <Route path="pharmacy" element={<Random />} />
                 <Route path="book" element={<Random />} />
             </Route>

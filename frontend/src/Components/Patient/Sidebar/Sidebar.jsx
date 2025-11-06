@@ -40,8 +40,8 @@ const Sidebar = ({ isOpen }) => {
     const links = [
         { name: "Trang chủ", href: "/patient/dashboard", icon: <IconLayoutGrid size={20} /> },
         { name: "Hồ sơ y tế", href: "/patient/profile", icon: <IconMoodHeart size={20} /> },
+        { name: "Gia đình", href: "/patient/family", icon: <IconCalendarCheck size={20} /> },
         { name: "Cuộc hẹn", href: "/patient/appointments", icon: <IconCalendarCheck size={20} /> },
-        { name: "Nhà thuốc", href: "/patient/pharmacy", icon: <IconVaccine size={20} /> },
     ];
 
     if (!isOpen) return null;

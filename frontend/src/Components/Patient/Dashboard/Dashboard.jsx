@@ -12,10 +12,10 @@ const Dashboard = () => {
                 <Welcome />
                 <Visits />
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-5">
                 <DiseaseChart />
                 <Appointment />
-                <Medications />
+                {/* <Medications /> */}
             </div>
         </div>
     )

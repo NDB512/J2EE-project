@@ -800,6 +800,95 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const getFamilyDetail = async (familyId) => {
+        try {
+            const res = await api.get(`/family/${familyId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải thông tin hồ sơ gia đình!");
+            throw err;
+        }
+    };
+
+    const getFamilyMembers = async (familyId) => {
+        try {
+            const res = await api.get(`/family/${familyId}/members`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể tải danh sách thành viên trong gia đình!");
+            throw err;
+        }
+    };
+
+    const addMemberToFamily = async (payload) => {
+        try {
+            const res = await api.post(`/family/add-member`, payload, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Thêm thành viên thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể thêm thành viên vào gia đình!");
+            throw err;
+        }
+    };
+
+    const removeMemberFromFamily = async (familyId, patientId) => {
+        try {
+            await api.delete(`/family/${familyId}/member/${patientId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Xóa thành viên thành công!");
+        } catch (err) {
+            errorNotification("Không thể xóa thành viên!");
+            throw err;
+        }
+    };
+
+    const createFamily = async (creatorId, familyData) => {
+        try {
+            const res = await api.post(`/family/create/${creatorId}`, familyData, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Tạo hồ sơ gia đình thành công!");
+            return res.data; // id gia đình
+        } catch (err) {
+            errorNotification("Không thể tạo hồ sơ gia đình!");
+            throw err;
+        }
+    };
+
+    const updateFamily = async (familyId, familyData) => {
+        try {
+            const res = await api.put(`/family/update/${familyId}`, familyData, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Cập nhật hồ sơ gia đình thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể cập nhật hồ sơ gia đình!");
+            throw err;
+        }
+    };
+
+    const deleteFamily = async (familyId, requesterId, requesterRole) => {
+        try {
+            await api.delete(`/family/delete/${familyId}`, {
+                params: { requesterId, requesterRole },
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Xóa hồ sơ gia đình thành công!");
+        } catch (err) {
+            errorNotification("Không thể xóa hồ sơ gia đình!");
+            throw err;
+        }
+    };
+
+
     return (
         <AuthContext.Provider
             value={{
@@ -862,6 +951,13 @@ export const AuthProvider = ({ children }) => {
                 getMedicineByPatientId,
                 getTodaysAppointments,
                 getApRecordDetail,
+                getFamilyDetail,
+                getFamilyMembers,
+                addMemberToFamily,
+                removeMemberFromFamily,
+                createFamily,
+                updateFamily,
+                deleteFamily,
                 logout,
                 refresh,
             }}
