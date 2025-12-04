@@ -1,15 +1,18 @@
-import { Avatar, Button, Divider, Table, TextInput, NumberInput, Select, TagsInput, Modal } from '@mantine/core';
+import { Avatar, Button, Divider, TextInput, NumberInput, Select, TagsInput, Modal, Paper, Stack, Text, Group, Flex, Badge, Transition, Container } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../../Content/AuthContext';
-import { IconEdit } from '@tabler/icons-react';
+import { IconEdit, IconUser, IconCalendar, IconPhone, IconGenderMale, IconMapPin, IconId, IconDroplet, IconStethoscope, IconPhoneCall, IconShield, IconClipboard, IconPencil, IconAlertCircle } from '@tabler/icons-react';
 import '@mantine/dates/styles.css';
 import { bloodGroups, genders } from '../../../Data/DropdownData';
 import { useDisclosure } from '@mantine/hooks';
 import { DropzoneButton } from '../../Utils/Dropzone/Dropzonebutton';
 import { useForm } from '@mantine/form';
+import { useDispatch } from 'react-redux';
+import { setAuth } from '../../../Slices/AuthSlices';
 
 const Profile = () => {
+    const dispatch = useDispatch();
     const { user, getPatientInfo, updatePatientInfo, getMedia, saveImageId } = useAuth();
     const [editMode, setEditMode] = useState(false);
     const [profileData, setProfileData] = useState(null);
@@ -28,7 +31,9 @@ const Profile = () => {
         const fetchProfile = async () => {
             setLoading(true);
             try {
-                const res = await getPatientInfo(user?.profileId); // Thay profileId bằng id vì lưu bên user
+                const res = await getPatientInfo(user?.profileId);
+
+                console.log("data: ", res)
 
                 // Convert chuỗi dị ứng "Bụi, Phấn hoa" -> ["Bụi", "Phấn hoa"]
                 const formattedData = {
@@ -73,6 +78,7 @@ const Profile = () => {
 
     // Hàm thay đổi form
     const handleChange = (field, value) => {
+        form.setFieldValue(field, value);  // THÊM: Sync với form để consistent
         setFormData((prev) => ({
             ...prev,
             [field]: value,
@@ -83,9 +89,20 @@ const Profile = () => {
     const handleImageUpdate = useCallback(async (imageId) => {
         setLoading(true);
         try {
+            // Lưu ảnh lên server
             await saveImageId(user?.id, imageId);
+
+            // Cập nhật profileData và formData
             setProfileData((prev) => ({ ...prev, profileImageUrlId: imageId }));
             form.setFieldValue('profileImageUrlId', imageId);
+
+            // Cập nhật avatar Redux user
+            dispatch(setAuth({
+                accessToken: localStorage.getItem('accessToken'),
+                refreshToken: localStorage.getItem('refreshToken'),
+                user: { ...user, profileImageUrlId: imageId }
+            }));
+
             console.log("Image ID sau khi lưu:", imageId);
         } catch (err) {
             console.error('Lỗi cập nhật ảnh:', err);
@@ -98,6 +115,7 @@ const Profile = () => {
 
     // Hủy chỉnh sửa -> khôi phục từ profileData gốc
     const handleCancel = () => {
+        form.setValues(profileData);  // SỬA: Sync form với profileData
         setFormData({
             ...profileData,
             allergies: profileData.allergies
@@ -112,17 +130,17 @@ const Profile = () => {
     // Lưu thay đổi
     const handleSave = async () => {
         try {
-            // Convert ["Bụi", "Phấn hoa"] -> "Bụi, Phấn hoa"
+            // SỬA: Dùng form.values để lấy data (đã sync), convert allergies
             const payload = {
-                ...formData,
-                allergies: Array.isArray(formData.allergies)
-                    ? formData.allergies.join(", ")
-                    : formData.allergies,
+                ...form.values,
+                allergies: Array.isArray(form.values.allergies)
+                    ? form.values.allergies.join(", ")
+                    : form.values.allergies,
             };
 
             console.log("Payload gửi đi:", payload);
 
-            const updated = await updatePatientInfo(user?.id, payload); // Thay profileId bằng id
+            const updated = await updatePatientInfo(user?.id, payload);
 
             console.log("Dữ liệu cập nhật trả về:", updated);
 
@@ -134,6 +152,7 @@ const Profile = () => {
                     : [],
             };
 
+            form.setValues(formattedUpdated);  // THÊM: Sync form
             setProfileData(formattedUpdated);
             setFormData(formattedUpdated);
             setEditMode(false);
@@ -145,266 +164,468 @@ const Profile = () => {
     // Lấy tên hiển thị: ưu tiên name, nếu không có thì lấy phần trước @ của email, nếu không có email thì hiện "Khách"
     const userName = formData?.name || user?.name || user?.email?.split('@')[0] || 'Khách';
 
+    // Hàm hiển thị giá trị với fallback
+    const displayValue = (value) => {
+        if (value === null || value === undefined || value === '') {
+            return <span className="text-gray-500 italic">Chưa cập nhật</span>;
+        }
+        return value;
+    };
+
+    // Component cho từng field - FIX: mounted={true} để tránh hide khi editMode=false
+    const ProfileField = ({ icon: Icon, label, value, editComponent, className = "" }) => (
+        <Paper shadow="xs" p="md" radius="md" className={`bg-white border border-gray-100 overflow-hidden ${className}`}>
+            <Stack gap="xs">
+                <Group gap="xs" className="text-teal-700 font-semibold">
+                    <Icon size={18} />
+                    <Text size="sm" fw={600}>{label}</Text>
+                </Group>
+                <Transition 
+                    mounted={true}  // FIX: Luôn mounted=true để content luôn visible, tránh out transition hide
+                    transition={{
+                        in: { 
+                            opacity: 1, 
+                            transform: 'translateY(0) scale(1)', 
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
+                        },
+                        out: { 
+                            opacity: 0, 
+                            transform: 'translateY(-10px) scale(0.98)', 
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' 
+                        }
+                    }}
+                    timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
+                >
+                    {(styles) => (
+                        <div style={styles}>
+                            {editMode ? (
+                                <div className="w-full">{editComponent}</div>
+                            ) : (
+                                <Text size="lg" c="dark" className="font-medium">
+                                    {displayValue(value)}
+                                </Text>
+                            )}
+                        </div>
+                    )}
+                </Transition>
+            </Stack>
+        </Paper>
+    );
+
     if (!formData) return <div className="p-10">Đang tải...</div>;
     if (loading) return <div className="p-10">Đang tải thông tin...</div>;
 
-
     return (
-        <div className="p-10">
+        <Container size="xl" className="p-6 md:p-10">
             {/* --- Header --- */}
-            <div className="flex justify-between items-center mb-5">
-                <div className="flex gap-5 items-center">
-                    <div className="flex flex-col items-center gap-3">
-                        <Avatar variant="filled" src={avatarSrc} size={120} alt="Avatar" />
-                        {editMode && <Button size="sm" onClick={open} variant='filled'>Cập nhập ảnh</Button>}
-                    </div>
-                    <div className="flex flex-col gap-3">
-                        <div className="text-3xl font-medium text-neutral-900">
-                            Xin chào, {userName}!
-                        </div>
-                        <div className="text-xl text-neutral-700">{user.email}</div>
-                    </div>
-                </div>
-                <Button
-                    variant={editMode ? 'outline' : 'filled'}
-                    color={editMode ? 'gray' : 'red'}
-                    leftSection={<IconEdit />}
-                    onClick={() => (editMode ? handleCancel() : setEditMode(true))}
-                >
-                    {editMode ? 'Hủy' : 'Chỉnh sửa'}
-                </Button>
-            </div>
+            <Transition 
+                mounted={true} 
+                transition="slide-down" 
+                duration={500}
+                timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
+            >
+                {(styles) => (
+                    <Paper 
+                        shadow="xl" 
+                        p="xl" 
+                        withBorder 
+                        radius="xl" 
+                        className="bg-gradient-to-r from-teal-50 via-blue-50 to-indigo-50 mb-8" 
+                        style={styles}
+                    >
+                        <Flex justify="space-between" align="center" direction={{ base: "column", md: "row" }} gap="md">
+                            <Flex align="center" gap="lg" className="w-full md:w-auto">
+                                <div className="relative">
+                                    <Transition 
+                                        mounted={true} 
+                                        transition={{
+                                            in: { transform: 'scale(1)', transition: 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' },
+                                            out: { transform: 'scale(0.95)', transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }
+                                        }}
+                                    >
+                                        {(avatarStyles) => (
+                                            <Avatar 
+                                                src={avatarSrc} 
+                                                size={140} 
+                                                alt="Avatar" 
+                                                className="ring-8 ring-white shadow-2xl border-4 border-white" 
+                                                style={avatarStyles}
+                                            />
+                                        )}
+                                    </Transition>
+                                    {editMode && (
+                                        <Transition 
+                                            mounted={editMode} 
+                                            transition="pop" 
+                                            duration={300}
+                                            timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
+                                        >
+                                            {(buttonStyles) => (
+                                                <Button 
+                                                    size="sm" 
+                                                    onClick={open} 
+                                                    variant="filled" 
+                                                    color="teal" 
+                                                    leftSection={<IconPencil size={14} />}
+                                                    className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 shadow-lg"
+                                                    style={buttonStyles}
+                                                >
+                                                    Ảnh
+                                                </Button>
+                                            )}
+                                        </Transition>
+                                    )}
+                                </div>
+                                <Stack gap="xs">
+                                    <Transition 
+                                        mounted={true} 
+                                        transition="fade" 
+                                        duration={600}
+                                        timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
+                                    >
+                                        {(textStyles) => (
+                                            <Text 
+                                                size="3xl" 
+                                                fw={700} 
+                                                c="dark" 
+                                                className="text-gradient bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
+                                                style={textStyles}
+                                            >
+                                                Xin chào, {userName}!
+                                            </Text>
+                                        )}
+                                    </Transition>
+                                    <Group gap="xs">
+                                        <IconClipboard size={20} className="text-teal-600" />
+                                        <Text size="lg" c="gray.6">{user.email}</Text>
+                                    </Group>
+                                </Stack>
+                            </Flex>
+                            <Transition 
+                                mounted={true} 
+                                transition="slide-right" 
+                                duration={400}
+                                timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
+                            >
+                                {(buttonStyles) => (
+                                    <Button
+                                        variant={editMode ? 'outline' : 'gradient'}
+                                        gradient={editMode ? undefined : { from: 'red', to: 'pink', deg: 45 }}
+                                        leftSection={<IconEdit />}
+                                        onClick={() => (editMode ? handleCancel() : setEditMode(true))}
+                                        size="lg"
+                                        className="shadow-xl font-semibold"
+                                        style={buttonStyles}
+                                    >
+                                        {editMode ? 'Hủy bỏ' : 'Chỉnh sửa hồ sơ'}
+                                    </Button>
+                                )}
+                            </Transition>
+                        </Flex>
+                    </Paper>
+                )}
+            </Transition>
 
-            <Divider my="xl" />
+            <Divider my="xl" className="border-gray-200" />
 
             {/* --- Thông tin cá nhân --- */}
-            <div>
-                <div className="text-2xl font-medium text-neutral-900 mb-5">
-                    Thông tin cá nhân
-                </div>
+            <Transition 
+                mounted={true} 
+                transition="scale-y" 
+                duration={600}
+                timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
+            >
+                {(formStyles) => (
+                    <Paper 
+                        shadow="md" 
+                        p="xl" 
+                        withBorder 
+                        radius="xl" 
+                        className="bg-white" 
+                        style={formStyles}
+                    >
+                        <Text 
+                            size="2xl" 
+                            fw={700} 
+                            c="dark" 
+                            mb="xl" 
+                            className="flex items-center gap-3"
+                        >
+                            <IconUser size={30} className="text-teal-600" />
+                            Thông tin cá nhân
+                        </Text>
 
-                <Table striped stripedColor="teal.0" verticalSpacing="md" withRowBorders={false}>
-                    <Table.Tbody className="[&>tr]:!mb-3">
+                        <Transition 
+                            mounted={editMode} 
+                            transition="fade" 
+                            duration={300}
+                            timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
+                        >
+                            {(editStyles) => editMode && <div style={editStyles} />}
+                        </Transition>
 
-                        {/* Họ và tên */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg w-1/4">Họ và tên</Table.Td>
-                            <Table.Td className="text-lg w-3/4">
-                                {editMode ? (
+                        <Stack gap="lg">
+                            {/* Họ và tên */}
+                            <ProfileField
+                                icon={IconUser}
+                                label="Họ và tên"
+                                value={formData.name}
+                                editComponent={
                                     <TextInput
-                                        value={formData.name}
+                                        value={formData.name || ''}
                                         maxLength={50}
                                         onChange={(e) => handleChange('name', e.target.value)}
                                         placeholder='Nhập họ tên'
+                                        size="lg"
+                                        leftSection={<IconUser size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : formData.name}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* Ngày sinh */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Ngày sinh</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Ngày sinh */}
+                            <ProfileField
+                                icon={IconCalendar}
+                                label="Ngày sinh"
+                                value={formData.dateOfBirth ? new Date(formData.dateOfBirth).toLocaleDateString('vi-VN') : null}
+                                editComponent={
                                     <DateInput
                                         value={formData.dateOfBirth ? new Date(formData.dateOfBirth) : null}
                                         onChange={(value) => handleChange('dateOfBirth', value || null)}
                                         valueFormat="DD/MM/YYYY"
-                                        label="Chọn ngày sinh"
+                                        placeholder="Chọn ngày sinh"
+                                        size="lg"
+                                        leftSection={<IconCalendar size={18} className="text-teal-600" />}
+                                        radius="md"
                                         clearable
                                     />
-                                ) : (
-                                    new Date(formData.dateOfBirth).toLocaleDateString('vi-VN')
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* Số điện thoại */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Số điện thoại</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Số điện thoại */}
+                            <ProfileField
+                                icon={IconPhone}
+                                label="Số điện thoại"
+                                value={formData.phone}
+                                editComponent={
                                     <NumberInput
-                                        value={formData.phone}
+                                        value={formData.phone || ''}
                                         onChange={(val) => handleChange('phone', val)}
                                         hideControls
                                         maxLength={10}
                                         placeholder='Nhập số điện thoại'
+                                        size="lg"
+                                        leftSection={<IconPhone size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    formData.phone
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Giới tính</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Giới tính */}
+                            <ProfileField
+                                icon={IconGenderMale}
+                                label="Giới tính"
+                                value={formData.gender}
+                                editComponent={
                                     <Select
                                         data={genders}
                                         value={formData.gender}
-                                        onChange={(val) => handleChange('gender', val)} // Sửa lỗi: onChange gọi handleChange('gender', val) thay vì 'bloodType'
+                                        onChange={(val) => handleChange('gender', val)}
                                         placeholder="Chọn giới tính"
+                                        size="lg"
+                                        leftSection={<IconGenderMale size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    formData.gender
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* Địa chỉ */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Địa chỉ</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Địa chỉ */}
+                            <ProfileField
+                                icon={IconMapPin}
+                                label="Địa chỉ"
+                                value={formData.address}
+                                editComponent={
                                     <TextInput
-                                        value={formData.address}
+                                        value={formData.address || ''}
                                         maxLength={100}
                                         onChange={(e) => handleChange('address', e.target.value)}
                                         placeholder='Nhập địa chỉ'
+                                        size="lg"
+                                        leftSection={<IconMapPin size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    formData.address
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* CCCD */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">CCCD</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* CCCD */}
+                            <ProfileField
+                                icon={IconId}
+                                label="CCCD"
+                                value={formData.citizenId}
+                                editComponent={
                                     <NumberInput
-                                        value={formData.citizenId}
+                                        value={formData.citizenId || ''}
                                         hideControls
                                         maxLength={12}
                                         onChange={(val) => handleChange('citizenId', val)}
                                         placeholder='Nhập số CCCD'
+                                        size="lg"
+                                        leftSection={<IconId size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    formData.citizenId
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* Nhóm máu */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Nhóm máu</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Nhóm máu */}
+                            <ProfileField
+                                icon={IconDroplet}
+                                label="Nhóm máu"
+                                value={formData.bloodType}
+                                editComponent={
                                     <Select
                                         data={bloodGroups}
                                         value={formData.bloodType}
                                         onChange={(val) => handleChange('bloodType', val)}
                                         placeholder="Chọn nhóm máu"
+                                        size="lg"
+                                        leftSection={<IconDroplet size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    formData.bloodType
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* Dị ứng */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Dị ứng</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Dị ứng */}
+                            <ProfileField
+                                icon={IconAlertCircle}
+                                label="Dị ứng"
+                                value={Array.isArray(formData.allergies) ? formData.allergies.join(', ') : formData.allergies}
+                                editComponent={
                                     <TagsInput
                                         placeholder="Nhập thông tin dị ứng"
-                                        value={formData.allergies || []} // Phải là mảng
+                                        value={formData.allergies || []}
                                         onChange={(value) => handleChange('allergies', value)}
+                                        size="lg"
+                                        leftSection={<IconAlertCircle size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    (Array.isArray(formData.allergies)
-                                        ? formData.allergies.join(', ')
-                                        : formData.allergies)
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* Bệnh mãn tính */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Bệnh mãn tính</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Bệnh mãn tính */}
+                            <ProfileField
+                                icon={IconStethoscope}
+                                label="Bệnh mãn tính"
+                                value={formData.chronicDisease}
+                                editComponent={
                                     <TextInput
-                                        value={formData.chronicDisease}
+                                        value={formData.chronicDisease || ''}
                                         maxLength={80}
                                         onChange={(e) => handleChange('chronicDisease', e.target.value)}
                                         placeholder='Nhập thông tin bệnh mãn tính'
+                                        size="lg"
+                                        leftSection={<IconStethoscope size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    formData.chronicDisease
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* Liên hệ khẩn cấp */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Liên hệ khẩn cấp</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Liên hệ khẩn cấp */}
+                            <ProfileField
+                                icon={IconPhoneCall}
+                                label="Liên hệ khẩn cấp"
+                                value={formData.emergencyContact}
+                                editComponent={
                                     <TextInput
-                                        value={formData.emergencyContact}
+                                        value={formData.emergencyContact || ''}
                                         maxLength={80}
                                         onChange={(e) => handleChange('emergencyContact', e.target.value)}
                                         placeholder='Nhập thông tin liên hệ khẩn cấp'
+                                        size="lg"
+                                        leftSection={<IconPhoneCall size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    formData.emergencyContact
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* Thông tin bảo hiểm */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Thông tin bảo hiểm</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Thông tin bảo hiểm */}
+                            <ProfileField
+                                icon={IconShield}
+                                label="Thông tin bảo hiểm"
+                                value={formData.insuranceDetails}
+                                editComponent={
                                     <TextInput
-                                        value={formData.insuranceDetails}
+                                        value={formData.insuranceDetails || ''}
                                         maxLength={80}
                                         onChange={(e) => handleChange('insuranceDetails', e.target.value)}
                                         placeholder='Nhập thông tin bảo hiểm'
+                                        size="lg"
+                                        leftSection={<IconShield size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    formData.insuranceDetails
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
+                                }
+                            />
 
-                        {/* Tiền sử bệnh */}
-                        <Table.Tr>
-                            <Table.Td className="font-semibold text-lg">Tiền sử bệnh</Table.Td>
-                            <Table.Td className="text-lg">
-                                {editMode ? (
+                            {/* Tiền sử bệnh */}
+                            <ProfileField
+                                icon={IconClipboard}
+                                label="Tiền sử bệnh"
+                                value={formData.medicalHistory}
+                                editComponent={
                                     <TextInput
-                                        value={formData.medicalHistory}
+                                        value={formData.medicalHistory || ''}
                                         maxLength={100}
                                         onChange={(e) => handleChange('medicalHistory', e.target.value)}
                                         placeholder='Nhập tiền sử bệnh'
+                                        size="lg"
+                                        leftSection={<IconClipboard size={18} className="text-teal-600" />}
+                                        radius="md"
                                     />
-                                ) : (
-                                    formData.medicalHistory
-                                )}
-                            </Table.Td>
-                        </Table.Tr>
-                    </Table.Tbody>
-                </Table>
+                                }
+                            />
+                        </Stack>
 
-                {editMode && (
-                    <div className="flex justify-end mt-6">
-                        <Button color="teal" onClick={handleSave}>
-                            Lưu thay đổi
-                        </Button>
-                    </div>
+                        {editMode && (
+                            <Transition 
+                                mounted={editMode} 
+                                transition="slide-up" 
+                                duration={400}
+                                timingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
+                            >
+                                {(saveStyles) => (
+                                    <Group justify="flex-end" mt="xl" style={saveStyles}>
+                                        <Button 
+                                            variant="gradient" 
+                                            gradient={{ from: 'teal', to: 'cyan', deg: 45 }} 
+                                            onClick={handleSave} 
+                                            size="lg" 
+                                            leftSection={<IconPencil size={18} />}
+                                            className="shadow-xl font-semibold"
+                                        >
+                                            Lưu thay đổi
+                                        </Button>
+                                    </Group>
+                                )}
+                            </Transition>
+                        )}
+                    </Paper>
                 )}
-            </div>
-            <Modal opened={opened} onClose={close} title={<span className='text-xl font-medium'>Cập nhập hình ảnh</span>} centered>
+            </Transition>
+
+            <Modal 
+                opened={opened} 
+                onClose={close} 
+                title={<span className='text-xl font-medium'>Cập nhật hình ảnh đại diện</span>} 
+                centered 
+                size="sm"
+                transitionProps={{
+                    transition: 'fade',
+                    duration: 300,
+                    timingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+            >
                 <DropzoneButton close={close} form={form} fieldName="profileImageUrlId" onUploadComplete={handleImageUpdate} />
             </Modal>
-        </div>
+        </Container>
     );
 };
 

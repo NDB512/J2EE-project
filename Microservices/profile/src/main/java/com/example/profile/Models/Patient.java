@@ -58,6 +58,9 @@ public class Patient {
     @Column(name = "role_in_family")
     private String roleInFamily;
 
+    @Column(name = "is_dependent", nullable = false)
+    private Boolean isDependent = false;
+
     public PatientDto toDto() {
         PatientDto dto = new PatientDto();
         dto.setId(this.id);

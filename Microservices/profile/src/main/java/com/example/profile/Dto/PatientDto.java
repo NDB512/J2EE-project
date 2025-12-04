@@ -40,6 +40,7 @@ public class PatientDto {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+    private Boolean isDependent;
 
     public Patient toEntity() {
         Patient patient = new Patient();
@@ -58,6 +59,7 @@ public class PatientDto {
         patient.setBloodType(bloodType);
         patient.setFamily(new Family(familyId));
         patient.setRoleInFamily(roleInFamily);
+        patient.setIsDependent(isDependent);
         return patient;
     }
 }
