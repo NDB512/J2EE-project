@@ -25,6 +25,8 @@ import AdminDashboardPage from "../Pages/Admin/AdminDashboardPage";
 import DoctorDashboardPage from "../Pages/Doctor/DoctorDashboardPage";
 import PatientDashboardPage from "../Pages/Patient/PatientDashboardPage";
 import PatientFamilyProfile from "../Pages/Patient/PatientFamilyProfile";
+import PatientListQuestionsPage from "../Pages/Patient/PatientListQuestionsPage";
+import PatientChatUiPage from "../Pages/Patient/PatientChatUiPage";
 
 const AppRouter = () => {
   return (
@@ -48,6 +50,8 @@ const AppRouter = () => {
                 <Route path="family" element={<PatientFamilyProfile />} />
                 <Route path="pharmacy" element={<Random />} />
                 <Route path="book" element={<Random />} />
+                <Route path="questions" element={<PatientListQuestionsPage />} />
+                <Route path="chat/:id" element={<PatientChatUiPage />} />
             </Route>
 
             <Route path="/doctor" element={<ProtectedRoute allowedRoles={["Doctor"]}> <DoctorDashboard /> </ProtectedRoute>}>

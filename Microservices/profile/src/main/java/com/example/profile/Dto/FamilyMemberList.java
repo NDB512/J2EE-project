@@ -1,5 +1,8 @@
 package com.example.profile.Dto;
 
+import lombok.Data;
+
+@Data
 public class FamilyMemberList {
     private Long id;
     private String name;

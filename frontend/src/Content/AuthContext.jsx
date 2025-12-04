@@ -29,9 +29,9 @@ export const AuthProvider = ({ children }) => {
             const data = res.data;
 
             if (data.accessToken && data.refreshToken) {
-                // Decode JWT để lấy user info
                 const decoded = decodeToken(data.accessToken);
-                const userData = {
+
+                let userData = {
                     id: decoded?.id,
                     name: decoded?.name,
                     email: decoded?.email,
@@ -40,10 +40,19 @@ export const AuthProvider = ({ children }) => {
                     profileImageUrlId: decoded?.profileImageUrlId,
                 };
 
+                // 🔥 Nếu role là Patient → chỉ lấy familyId
+                if (decoded?.role === "Patient") {
+                    try {
+                        const patient = await getPatientInfo(decoded.profileId);
+                        userData.familyId = patient.familyId || null; // 🟩 chỉ lưu familyId
+                    } catch (err) {
+                        console.error("Lỗi khi lấy familyId:", err);
+                    }
+                }
+
                 dispatch(setAuth({ ...data, user: userData }));
                 successNotification("Đăng nhập thành công!");
 
-                // Return data với user để component sử dụng (ví dụ redirect)
                 return { ...data, user: userData, role: userData.role };
             }
         } catch (err) {
@@ -802,7 +811,7 @@ export const AuthProvider = ({ children }) => {
 
     const getFamilyDetail = async (familyId) => {
         try {
-            const res = await api.get(`/family/${familyId}`, {
+            const res = await api.get(`/profile/family/${familyId}`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             return res.data;
@@ -814,7 +823,7 @@ export const AuthProvider = ({ children }) => {
 
     const getFamilyMembers = async (familyId) => {
         try {
-            const res = await api.get(`/family/${familyId}/members`, {
+            const res = await api.get(`/profile/family/${familyId}/members`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             return res.data;
@@ -826,7 +835,7 @@ export const AuthProvider = ({ children }) => {
 
     const addMemberToFamily = async (payload) => {
         try {
-            const res = await api.post(`/family/add-member`, payload, {
+            const res = await api.post(`/profile/family/add-member`, payload, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             successNotification("Thêm thành viên thành công!");
@@ -839,7 +848,7 @@ export const AuthProvider = ({ children }) => {
 
     const removeMemberFromFamily = async (familyId, patientId) => {
         try {
-            await api.delete(`/family/${familyId}/member/${patientId}`, {
+            await api.delete(`/profile/family/${familyId}/member/${patientId}`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             successNotification("Xóa thành viên thành công!");
@@ -851,7 +860,7 @@ export const AuthProvider = ({ children }) => {
 
     const createFamily = async (creatorId, familyData) => {
         try {
-            const res = await api.post(`/family/create/${creatorId}`, familyData, {
+            const res = await api.post(`/profile/family/create/${creatorId}`, familyData, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             successNotification("Tạo hồ sơ gia đình thành công!");
@@ -864,7 +873,7 @@ export const AuthProvider = ({ children }) => {
 
     const updateFamily = async (familyId, familyData) => {
         try {
-            const res = await api.put(`/family/update/${familyId}`, familyData, {
+            const res = await api.put(`/profile/family/update/${familyId}`, familyData, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             successNotification("Cập nhật hồ sơ gia đình thành công!");
@@ -877,7 +886,7 @@ export const AuthProvider = ({ children }) => {
 
     const deleteFamily = async (familyId, requesterId, requesterRole) => {
         try {
-            await api.delete(`/family/delete/${familyId}`, {
+            await api.delete(`/profile/family/delete/${familyId}`, {
                 params: { requesterId, requesterRole },
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
@@ -888,6 +897,21 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateMemberRoleApi = async ({ patientId, roleInFamily, requesterId, requesterRole, familyId }) => {
+        try {
+            console.log("Updating member role with data:", { patientId, roleInFamily, requesterId, requesterRole, familyId });
+            const res = await api.put(
+                `/profile/family/${familyId}/members/role`,
+                { patientId, roleInFamily, requesterId, requesterRole },
+                { headers: { Authorization: `Bearer ${accessToken}` } }
+            );
+            successNotification("Cập nhật vai trò thành công!");
+            return res.data;
+        } catch (err) {
+            errorNotification("Không thể cập nhật vai trò thành viên!");
+            throw err;
+        }
+    };
 
     return (
         <AuthContext.Provider
@@ -958,6 +982,7 @@ export const AuthProvider = ({ children }) => {
                 createFamily,
                 updateFamily,
                 deleteFamily,
+                updateMemberRoleApi,
                 logout,
                 refresh,
             }}

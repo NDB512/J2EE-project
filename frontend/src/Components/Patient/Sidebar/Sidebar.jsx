@@ -5,6 +5,7 @@ import {
     IconLayoutGrid,
     IconMoodHeart,
     IconCalendarCheck,
+    IconQuestionMark,
     IconVaccine,  
 } from "@tabler/icons-react";
 import { Avatar } from "@mantine/core";
@@ -42,6 +43,7 @@ const Sidebar = ({ isOpen }) => {
         { name: "Hồ sơ y tế", href: "/patient/profile", icon: <IconMoodHeart size={20} /> },
         { name: "Gia đình", href: "/patient/family", icon: <IconCalendarCheck size={20} /> },
         { name: "Cuộc hẹn", href: "/patient/appointments", icon: <IconCalendarCheck size={20} /> },
+        { name: "Tư vấn", href: "/patient/questions", icon: <IconQuestionMark size={20} /> },
     ];
 
     if (!isOpen) return null;

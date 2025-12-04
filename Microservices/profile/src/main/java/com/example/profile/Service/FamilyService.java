@@ -5,7 +5,7 @@ import java.util.List;
 import com.example.profile.Dto.AddMemberFamilyDto;
 import com.example.profile.Dto.FamilyDto;
 import com.example.profile.Dto.FamilyMemberList;
-import com.example.profile.Dto.PatientDto;
+import com.example.profile.Dto.UpdateMemberRoleDto;
 import com.example.profile.Exception.PrException;
 
 public interface FamilyService {
@@ -17,4 +17,5 @@ public interface FamilyService {
     public void deleteFamily(Long id, Long requesterId, String requesterRole) throws PrException;
     public void deleteFamilyMember(Long familyId, Long patientId) throws PrException;
     public void addMemberToFamily(AddMemberFamilyDto dto) throws PrException;
+    void updateMemberRole(Long familyId, UpdateMemberRoleDto dto) throws PrException;
 }

@@ -2,10 +2,12 @@ package com.example.profile.Api;
 
 import com.example.profile.Dto.AddMemberFamilyDto;
 import com.example.profile.Dto.FamilyDto;
-import com.example.profile.Dto.PatientDto;
+import com.example.profile.Dto.FamilyMemberList;
+import com.example.profile.Dto.UpdateMemberRoleDto;
 import com.example.profile.Exception.PrException;
 import com.example.profile.Service.FamilyService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/family")
+@RequestMapping("/profile/family")
 @RequiredArgsConstructor
 public class FamilyApi {
 
@@ -26,7 +28,7 @@ public class FamilyApi {
     public ResponseEntity<Long> addFamily(
             @RequestBody FamilyDto familyDto,
             @PathVariable Long creatorId) throws PrException {
-        return ResponseEntity.ok(familyService.addFamily(familyDto, creatorId));
+        return ResponseEntity.ok(familyService.addFamily(familyDto));
     }
 
     /**
@@ -59,7 +61,7 @@ public class FamilyApi {
      * Lấy danh sách thành viên của gia đình
      */
     @GetMapping("/{familyId}/members")
-    public ResponseEntity<List<PatientDto>> getPatientsByFamilyId(@PathVariable Long familyId) throws PrException {
+    public ResponseEntity<List<FamilyMemberList>> getPatientsByFamilyId(@PathVariable Long familyId) throws PrException {
         return ResponseEntity.ok(familyService.getPatientsByFamilyId(familyId));
     }
 
@@ -93,5 +95,17 @@ public class FamilyApi {
     public ResponseEntity<String> addMember(@RequestBody AddMemberFamilyDto dto) throws PrException {
         familyService.addMemberToFamily(dto);
         return ResponseEntity.ok("Thêm thành viên vào gia đình thành công.");
+    }
+
+    @PutMapping("/{familyId}/members/role")
+    public ResponseEntity<?> updateMemberRole(
+            @PathVariable Long familyId,
+            @Valid @RequestBody UpdateMemberRoleDto dto) {
+        try {
+            familyService.updateMemberRole(familyId, dto);
+            return ResponseEntity.ok("Cập nhật vai trò thành công");
+        } catch (PrException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

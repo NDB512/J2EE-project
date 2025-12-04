@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.profile.Dto.AddMemberFamilyDto;
 import com.example.profile.Dto.FamilyDto;
 import com.example.profile.Dto.FamilyMemberList;
+import com.example.profile.Dto.UpdateMemberRoleDto;
 import com.example.profile.Exception.PrException;
 import com.example.profile.Models.Family;
 import com.example.profile.Models.Patient;
@@ -260,5 +261,27 @@ public class FamilyServiceImpl implements FamilyService {
         patient.setFamily(family);
         patient.setRoleInFamily(dto.getRoleInFamily() != null ? dto.getRoleInFamily() : "Member");
         return patientRepository.save(patient);
+    }
+
+    @Override
+    @Transactional
+    public void updateMemberRole(Long familyId, UpdateMemberRoleDto dto) throws PrException {
+        Objects.requireNonNull(familyId, "familyId không được null");
+
+        Family family = familyRepository.findById(familyId)
+                .orElseThrow(() -> new PrException("Gia đình ID " + familyId + " không tồn tại."));
+        Patient patient = patientRepository.findById(dto.getPatientId())
+                .orElseThrow(() -> new PrException("Bệnh nhân ID " + dto.getPatientId() + " không tồn tại."));
+
+        if (patient.getFamily() == null || !patient.getFamily().getId().equals(familyId)) {
+            throw new PrException("Bệnh nhân không thuộc gia đình này.");
+        }
+
+        if (!isAuthorized(dto.getRequesterId(), dto.getRequesterRole(), family)) {
+            throw new PrException("Bạn không có quyền cập nhật vai trò thành viên.");
+        }
+
+        patient.setRoleInFamily(dto.getRoleInFamily());
+        patientRepository.save(patient);
     }
 }

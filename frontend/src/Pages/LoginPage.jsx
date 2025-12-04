@@ -72,7 +72,6 @@ const LoginPage = () => {
 
             // Decode JWT để lấy user info
             const decoded = jwtDecode(data.accessToken);
-            console.log("Decoded JWT:", decoded);
             const userData = {
                 id: decoded.id,
                 name: decoded.name,
