@@ -70,7 +70,8 @@
             "mainClass": "com.example.profile.ProfileApplication",
             "projectName": "profile",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=51790 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=profile"
         },
         {
             "type": "java",
@@ -110,6 +111,16 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.example.media.MediaApplication",
             "projectName": "media",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ChatserverApplication<chatserver>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.chatserver.ChatserverApplication",
+            "projectName": "chatserver",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

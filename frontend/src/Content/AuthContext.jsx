@@ -899,7 +899,6 @@ export const AuthProvider = ({ children }) => {
 
     const updateMemberRoleApi = async ({ patientId, roleInFamily, requesterId, requesterRole, familyId }) => {
         try {
-            console.log("Updating member role with data:", { patientId, roleInFamily, requesterId, requesterRole, familyId });
             const res = await api.put(
                 `/profile/family/${familyId}/members/role`,
                 { patientId, roleInFamily, requesterId, requesterRole },
@@ -909,6 +908,126 @@ export const AuthProvider = ({ children }) => {
             return res.data;
         } catch (err) {
             errorNotification("Không thể cập nhật vai trò thành viên!");
+            throw err;
+        }
+    };
+
+    const listQuestionsApi = async (profileId) => {
+        try {
+            const response = await api.get("/chatserver/questions", {
+                params: { patientId: profileId }, // dùng profileId thay cho familyId
+                headers: { Authorization: `Bearer ${accessToken}` } // nếu cần
+            });
+
+            return response.data; // trả về mảng câu hỏi
+        } catch (err) {
+            console.error("Error loading questions:", err);
+            errorNotification("Không thể tải danh sách câu hỏi!");
+            throw err;
+        }
+    };
+
+    const createQuestionApi = async (dto, accessToken) => {
+        try {
+            const response = await api.post("/chatserver/questions", dto, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            successNotification("Đặt câu hỏi thành công!");
+            return response.data; // { questionId: ... }
+        } catch (err) {
+            console.error("Error creating question:", err);
+            errorNotification("Không thể đặt câu hỏi!");
+            throw err;
+        }
+    };
+
+    // Lấy chi tiết 1 câu hỏi
+    const getQuestionApi = async (questionId, accessToken) => {
+        try {
+            const response = await api.get(`/chatserver/questions/${questionId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return response.data;
+        } catch (err) {
+            console.error("Error getting question detail:", err);
+            errorNotification("Không thể tải chi tiết câu hỏi!");
+            throw err;
+        }
+    };
+
+    // ====================== Doctor ======================
+
+    // Lấy pending questions theo chuyên khoa
+    const listPendingQuestionsApi = async (specialization, accessToken) => {
+        try {
+            const response = await api.get("/chatserver/questions/doctor", {
+                params: { specialization },
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return response.data;
+        } catch (err) {
+            console.error("Error loading pending questions:", err);
+            errorNotification("Không thể tải danh sách câu hỏi chờ!");
+            throw err;
+        }
+    };
+
+    // Doctor nhận câu hỏi (assign)
+    const assignDoctorApi = async (questionId, doctorId, accessToken) => {
+        try {
+            const response = await api.post(
+                `/chatserver/questions/${questionId}/assign`,
+                { doctorId },
+                { headers: { Authorization: `Bearer ${accessToken}` } }
+            );
+            successNotification("Đã nhận câu hỏi!");
+            return response.data; // { questionId, roomId, status }
+        } catch (err) {
+            console.error("Error assigning doctor:", err);
+            errorNotification("Không thể nhận câu hỏi!");
+            throw err;
+        }
+    };
+
+    const getDoctorAssignedApi = async (doctorId) => {
+        try {
+            const response = await api.get("/chatserver/questions/assigned", {
+                params: { doctorId },
+                headers: { Authorization: `Bearer ${accessToken}` } // nếu cần
+            });
+            return response.data;
+        } catch (err) {
+            console.error("Error loading assigned questions:", err);
+            throw err;
+        }
+    };
+
+    // ====================== Chat ======================
+
+    // Gửi message
+    const sendMessageApi = async (payload, accessToken) => {
+        try {
+            const response = await api.post("/chatserver/send", payload, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return response.data; // messageDto
+        } catch (err) {
+            console.error("Error sending message:", err);
+            errorNotification("Không thể gửi tin nhắn!");
+            throw err;
+        }
+    };
+
+    // Lấy history chat
+    const getHistoryApi = async (roomId, accessToken) => {
+        try {
+            const response = await api.get(`/chatserver/history/${roomId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return response.data; // array of messages
+        } catch (err) {
+            console.error("Error loading chat history:", err);
+            errorNotification("Không thể tải lịch sử chat!");
             throw err;
         }
     };
@@ -983,6 +1102,14 @@ export const AuthProvider = ({ children }) => {
                 updateFamily,
                 deleteFamily,
                 updateMemberRoleApi,
+                listQuestionsApi,
+                createQuestionApi,
+                getQuestionApi,
+                listPendingQuestionsApi,
+                assignDoctorApi,
+                getDoctorAssignedApi,
+                sendMessageApi,
+                getHistoryApi,
                 logout,
                 refresh,
             }}

@@ -13,4 +13,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     // Doctor xem danh sách pending theo chuyên khoa
     List<Question> findByStatusAndSpecialtyOrderByCreatedAtDesc(String status, String specialty);
+
+    List<Question> findByAssignedDoctorIdAndStatusOrderByCreatedAtDesc(Long doctorId, String string);
 }

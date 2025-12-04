@@ -27,6 +27,10 @@ import PatientDashboardPage from "../Pages/Patient/PatientDashboardPage";
 import PatientFamilyProfile from "../Pages/Patient/PatientFamilyProfile";
 import PatientListQuestionsPage from "../Pages/Patient/PatientListQuestionsPage";
 import PatientChatUiPage from "../Pages/Patient/PatientChatUiPage";
+import PatientCreateQuestionPage from "../Pages/Patient/PatientCreateQuestionPage";
+import DoctorAssignedQuestionsPage from "../Pages/Doctor/DoctorAssignedQuestionsPage";
+import DoctorPendingQuestionsPages from "../Pages/Doctor/DoctorPendingQuestionsPages";
+import DoctorChatUiPage from "../Pages/Doctor/DoctorChatUiPage";
 
 const AppRouter = () => {
   return (
@@ -51,7 +55,8 @@ const AppRouter = () => {
                 <Route path="pharmacy" element={<Random />} />
                 <Route path="book" element={<Random />} />
                 <Route path="questions" element={<PatientListQuestionsPage />} />
-                <Route path="chat/:id" element={<PatientChatUiPage />} />
+                <Route path="chat/:roomId" element={<PatientChatUiPage />} />
+                <Route path="question/create" element={<PatientCreateQuestionPage />} />
             </Route>
 
             <Route path="/doctor" element={<ProtectedRoute allowedRoles={["Doctor"]}> <DoctorDashboard /> </ProtectedRoute>}>
@@ -61,6 +66,9 @@ const AppRouter = () => {
                 <Route path="appointments" element={<DoctorAppointmentPage />} />
                 <Route path="appointments/:id" element={<DoctorAppointmentDetailPage />} />
                 <Route path="prescriptions" element={<Random />} />
+                <Route path="question/assigned" element={<DoctorAssignedQuestionsPage />} />
+                <Route path="questions" element={<DoctorPendingQuestionsPages />} />
+                <Route path="chat/:roomId" element={<DoctorChatUiPage />} />
             </Route>
 
             <Route path="/pharmacy" element={<ProtectedRoute allowedRoles={["Pharmacy"]}> <PharmacyDashboard /> </ProtectedRoute>}>

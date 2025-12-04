@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../Content/AuthContext";
 import { useQuestionDetail } from "./useQuestionDetail";
-import { useChatSocket } from "../../../hook/useChatSocket";
+import { useChatSocket } from "../../../hooks/useChatSocket";
 
 export default function DoctorChatUI() {
     const { roomId } = useParams();

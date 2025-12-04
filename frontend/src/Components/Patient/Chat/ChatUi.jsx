@@ -143,7 +143,7 @@ export default function ChatUI() {
                     <Button 
                         variant="subtle" 
                         size="xs" 
-                        onClick={() => navigate("/questions/list")}
+                        onClick={() => navigate("/patient/questions")}
                     >
                         ← Quay lại
                     </Button>

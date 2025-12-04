@@ -21,7 +21,7 @@ import java.util.Map;
 public class ChatController {
 
     private final ChatService chatService;
-    private final SimpMessagingTemplate messagingTemplate;  // Inject mới (Spring auto-wire)
+    private final SimpMessagingTemplate messagingTemplate;
 
     // Patient tạo câu hỏi
     @PostMapping("/questions")
@@ -84,5 +84,12 @@ public class ChatController {
     @GetMapping("/history/{roomId}")
     public ResponseEntity<List<MessageDto>> history(@PathVariable String roomId) {
         return ResponseEntity.ok(chatService.getHistory(roomId));
+    }
+
+    // Doctor lấy danh sách câu hỏi đã nhận (ASSIGNED)
+    @GetMapping("/questions/assigned")
+    public ResponseEntity<List<Question>> getAssignedQuestions(@RequestParam Long doctorId) {
+        List<Question> assignedQuestions = chatService.getAssignedQuestionsByDoctor(doctorId);
+        return ResponseEntity.ok(assignedQuestions);
     }
 }

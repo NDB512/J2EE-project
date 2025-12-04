@@ -16,6 +16,7 @@ const doctorLinks = [
     { name: "Hồ sơ", href: "/doctor/profile", icon: <IconMoodHeart size={20} /> },
     { name: "Bệnh nhân", href: "/doctor/patients", icon: <IconMoodHeart size={20} /> },
     { name: "Cuộc hẹn", href: "/doctor/appointments", icon: <IconCalendarCheck size={20} /> },
+    { name: "Câu hỏi chờ", href: "/doctor/questions", icon: <IconMoodHeart size={20} /> },
     // { name: "Đơn thuốc", href: "/doctor/prescriptions", icon: <IconMoodHeart size={20} /> },
 ];
 

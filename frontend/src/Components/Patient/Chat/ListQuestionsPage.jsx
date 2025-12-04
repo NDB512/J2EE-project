@@ -1,4 +1,3 @@
-// ListQuestionsPage.jsx - Trang danh sách câu hỏi cho Patient
 import React, { useState, useEffect } from "react";
 import { Card, Loader, Alert, Badge, Anchor, Button, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
@@ -11,22 +10,22 @@ export default function ListQuestionsPage() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const familyId = user?.familyId;
+    const profileId = user?.profileId; // dùng profileId thay cho familyId
 
-    // Hàm loadQuestions đưa ra ngoài để dùng được trong useEffect và handleRetry
+    // Hàm loadQuestions
     const loadQuestions = async () => {
-        if (!user || !familyId) {
+        if (!user || !profileId) {
             setError("Đang tải thông tin người dùng. Vui lòng chờ hoặc đăng nhập lại.");
             setLoading(false);
             return;
         }
 
         try {
-            setError(null); // Xóa lỗi trước khi gọi API
+            setError(null);
             setLoading(true);
-            console.log("Loading questions for familyId:", familyId);
-            const data = await listQuestionsApi(familyId);
-            setQuestions(Array.isArray(data) ? data : []); // Bảo vệ nếu data null
+            console.log("Loading questions for profileId:", profileId);
+            const data = await listQuestionsApi(profileId); // gọi API theo profileId
+            setQuestions(Array.isArray(data) ? data : []);
             console.log("Loaded questions:", data.length);
         } catch (err) {
             console.error("Error loading questions:", err);
@@ -38,7 +37,7 @@ export default function ListQuestionsPage() {
 
     useEffect(() => {
         loadQuestions();
-    }, [user, familyId, listQuestionsApi]);
+    }, [user, profileId]);
 
     const handleRetry = () => {
         setQuestions([]);
@@ -47,7 +46,7 @@ export default function ListQuestionsPage() {
 
     const handleChat = (questionId) => {
         const roomId = `question-${questionId}`;
-        navigate(`/chat/${roomId}`);
+        navigate(`/patient/chat/${roomId}`);
     };
 
     if (loading) {
@@ -85,7 +84,7 @@ export default function ListQuestionsPage() {
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-semibold text-gray-800">Danh sách câu hỏi của bạn</h1>
                     <Anchor 
-                        href="/question" 
+                        href="/patient/question/create" 
                         className="underline text-blue-600 font-medium hover:text-blue-800"
                         size="sm"
                     >
@@ -102,11 +101,11 @@ export default function ListQuestionsPage() {
                             className="mb-4"
                         >
                             Bạn chưa đặt câu hỏi nào. 
-                            <Anchor href="/question" className="underline ml-1">Đặt câu hỏi ngay!</Anchor> để nhận tư vấn từ bác sĩ.
+                            <Anchor href="/patient/question" className="underline ml-1">Đặt câu hỏi ngay!</Anchor> để nhận tư vấn từ bác sĩ.
                         </Alert>
                         <Button 
                             fullWidth 
-                            onClick={() => navigate("/question")} 
+                            onClick={() => navigate("/patient/question")} 
                             className="rounded-xl bg-blue-500 hover:bg-blue-600"
                         >
                             Bắt đầu đặt câu hỏi

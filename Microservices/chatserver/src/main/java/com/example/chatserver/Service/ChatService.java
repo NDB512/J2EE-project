@@ -116,4 +116,9 @@ public class ChatService {
         dto.setTimestamp(m.getTimestamp());
         return dto;
     }
+
+    public List<Question> getAssignedQuestionsByDoctor(Long doctorId) {
+        log.info("Fetching assigned questions for doctorId: {}", doctorId);
+        return questionRepository.findByAssignedDoctorIdAndStatusOrderByCreatedAtDesc(doctorId, "ASSIGNED");
+    }
 }
