@@ -1,5 +1,6 @@
 package com.example.appointment.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -131,4 +132,9 @@ public interface AppointmentRepository extends CrudRepository<Appointment, Long>
 
     List<Appointment> findByAppointmentDateBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
 
+    List<Appointment> findByPatientIdAndAppointmentDateBetween(
+            Long patientId,
+            LocalDateTime start,
+            LocalDateTime end
+    );
 }

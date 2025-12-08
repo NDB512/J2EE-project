@@ -14,7 +14,7 @@ import { useAuth } from "../../../Content/AuthContext";
 const doctorLinks = [
     { name: "Bảng điều khiển", href: "/doctor/dashboard", icon: <IconLayoutGrid size={20} /> },
     { name: "Hồ sơ", href: "/doctor/profile", icon: <IconMoodHeart size={20} /> },
-    { name: "Bệnh nhân", href: "/doctor/patients", icon: <IconMoodHeart size={20} /> },
+    // { name: "Bệnh nhân", href: "/doctor/patients", icon: <IconMoodHeart size={20} /> },
     { name: "Cuộc hẹn", href: "/doctor/appointments", icon: <IconCalendarCheck size={20} /> },
     { name: "Câu hỏi chờ", href: "/doctor/questions", icon: <IconMoodHeart size={20} /> },
     // { name: "Đơn thuốc", href: "/doctor/prescriptions", icon: <IconMoodHeart size={20} /> },

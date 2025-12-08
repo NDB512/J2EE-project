@@ -29,8 +29,8 @@ const Welcome = () => {
     }, [user]);
 
     const stats = [
-        { label: 'Các cuộc hẹn', value: '34', color: 'from-blue-400 to-indigo-400', icon: <IconCalendar size={22} /> },
-        { label: 'Bệnh nhân mới', value: '12', color: 'from-green-400 to-emerald-400', icon: <IconUserPlus size={22} /> },
+        { label: 'Các cuộc hẹn', value: '7', color: 'from-blue-400 to-indigo-400', icon: <IconCalendar size={22} /> },
+        { label: 'Bệnh nhân mới', value: '4', color: 'from-green-400 to-emerald-400', icon: <IconUserPlus size={22} /> },
     ];
 
     return (

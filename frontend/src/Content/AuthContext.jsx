@@ -1032,6 +1032,20 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const getTodaysAppointmentsByPatientApi = async (patientId) => {
+        try {
+            const response = await api.get(`/appointment/patient/${patientId}/today`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return response.data; // array of AppointmentDetails
+        } catch (err) {
+            console.error("Error loading today's appointments:", err);
+            errorNotification("Không thể tải cuộc hẹn hôm nay!");
+            throw err;
+        }
+    };
+
+
     return (
         <AuthContext.Provider
             value={{
@@ -1110,6 +1124,7 @@ export const AuthProvider = ({ children }) => {
                 getDoctorAssignedApi,
                 sendMessageApi,
                 getHistoryApi,
+                getTodaysAppointmentsByPatientApi,
                 logout,
                 refresh,
             }}

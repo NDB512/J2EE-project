@@ -40,7 +40,7 @@ const Welcome = () => {
             <div className="flex gap-5">
                 <div className="p-3 rounded-xl bg-violet-200">
                     <div className="text-sm">Các cuộc hẹn</div>
-                    <div className="text-lg font-semibold">34</div>
+                    <div className="text-lg font-semibold">51</div>
                 </div>
             </div>
         </div>

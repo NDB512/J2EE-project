@@ -1,22 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DonutChart } from "@mantine/charts";
+import { useAuth } from "../../../Content/AuthContext";
 
 const DiseaseChart = () => {
-    // Dữ liệu mẫu cho biểu đồ tròn
-    const diseaseData = [
-        { name: "Cảm cúm", value: 40, color: "blue" },
-        { name: "Sốt xuất huyết", value: 25, color: "red" },
-        { name: "Viêm phổi", value: 20, color: "teal" },
-        { name: "Covid-19", value: 15, color: "orange" },
+    const { getReasonsCountByPatient } = useAuth();
+    const [reasonData, setReasonData] = useState([]);
+
+    useEffect(() => {
+        const fetchReasons = async () => {
+        try {
+            const data = await getReasonsCountByPatient();
+            setReasonData(data);
+        } catch (error) {
+            console.error("Error fetching reasons:", error);
+        }
+        };
+        fetchReasons();
+    }, [getReasonsCountByPatient]);
+
+    // Danh sách màu tự động
+    const colors = [
+        "blue", "red", "teal", "orange", "grape", "cyan", "lime", "violet"
     ];
+
+    // Chuyển dữ liệu API thành dữ liệu biểu đồ
+    const diseaseData = reasonData.map((item, index) => ({
+        name: item.reason,
+        value: item.count,
+        color: colors[index % colors.length],
+    }));
 
     return (
         <div className="p-3 rounded-xl bg-green-50 shadow-xl flex flex-col gap-3">
             <div className="text-lg font-semibold">
-                Phân bố các loại bệnh của bạn
+                Phân bố các lý do khám bệnh phổ biến
             </div>
             <div className="flex justify-center">
-                <DonutChart chartLabel={"Các bệnh"} thickness={25} withLabels paddingAngle={10} withLabelsLine labelsType="percent" data={diseaseData} size={200} />
+                <DonutChart
+                chartLabel={"Lý do khám"}
+                thickness={25}
+                withLabels
+                withLabelsLine
+                labelsType="percent"
+                paddingAngle={10}
+                data={diseaseData}
+                size={200}
+                />
             </div>
         </div>
     );

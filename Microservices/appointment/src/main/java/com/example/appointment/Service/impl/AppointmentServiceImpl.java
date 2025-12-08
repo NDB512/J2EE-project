@@ -371,4 +371,36 @@ public class AppointmentServiceImpl implements AppointmentService {
             );
         }).toList();
     }
+
+    @Override
+    public List<AppointmentDetails> getTodaysAppointmentsByPatient(Long patientId) throws ApException {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+        return repository.findByPatientIdAndAppointmentDateBetween(patientId, startOfDay, endOfDay)
+            .stream()
+            .map(appointment -> {
+                DoctorDto doctorDto = profileClient.getDoctorById(appointment.getDoctorId());
+                PatientDto patientDto = profileClient.getPatientById(appointment.getPatientId());
+
+                return new AppointmentDetails(
+                        appointment.getId(),
+                        appointment.getPatientId(),
+                        patientDto != null ? patientDto.getName() : "Không xác định",
+                        appointment.getDoctorId(),
+                        doctorDto != null ? doctorDto.getName() : "Không xác định",
+                        appointment.getAppointmentDate(),
+                        appointment.getReason(),
+                        appointment.getNotes(),
+                        appointment.getStatus(),
+                        appointment.getLocation(),
+                        appointment.getStatusReason(),
+                        appointment.getCompletedAt(),
+                        appointment.getCancelledAt()
+                );
+            })
+            .toList();
+    }
+
 }

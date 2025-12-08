@@ -32,4 +32,5 @@ public interface AppointmentService {
     public List<ReasonCountDto> getReasonsCountForAll() throws ApException;
 
     public List<AppointmentDetails> getTodaysAppointments() throws ApException;
+    public List<AppointmentDetails> getTodaysAppointmentsByPatient(Long patientId) throws ApException;
 }

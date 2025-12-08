@@ -19,7 +19,7 @@ import { useAuth } from "../../../Content/AuthContext";
 const adminLinks = [
     { name: 'Bảng điều khiển', href: '/admin/dashboard', icon: <IconLayoutGrid /> },
     { name: 'Bác sĩ', href: '/admin/doctor', icon: <IconStethoscope /> },
-    { name: 'Hồ sơ y tế', href: '/admin/patients', icon: <IconMoodHeart /> },
+    { name: 'Hồ sơ y tế bệnh nhân', href: '/admin/patients', icon: <IconMoodHeart /> },
     { name: 'Cuộc hẹn', href: '/admin/appointments', icon: <IconCalendarCheck /> },
     { name: 'Dược phẩm', href: '/admin/medicine', icon: <IconVaccine /> },
     { name: 'Quản lý tồn kho', href: '/admin/inventory', icon: <IconPackage /> },

@@ -123,4 +123,10 @@ public class AppointmentApi {
     public ResponseEntity<List<AppointmentDetails>> getTodaysAppointments() throws ApException {
         return new ResponseEntity<>(service.getTodaysAppointments(), HttpStatus.OK);
     }
+
+    @GetMapping("/patient/{patientId}/today")
+    public ResponseEntity<List<AppointmentDetails>> getTodaysAppointmentsByPatient(
+            @PathVariable Long patientId) throws ApException {
+        return new ResponseEntity<>(service.getTodaysAppointmentsByPatient(patientId), HttpStatus.OK);
+    }
 }
